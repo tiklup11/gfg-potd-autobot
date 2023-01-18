@@ -1,0 +1,17 @@
+/**
+upon making a post request to this endpoint : /api/latest/problems/submission/result/ 
+
+correct : sub_status : 1
+incorrect : sub_status : 0
+othre sub_status codes for each type of errors
+
+
+/**
+1. get potd URL
+2. compile solution
+    - get pre code
+    - get complete solution
+3. send a post to submit
+    - get submittion id
+    - make submittion
+4. confirmation
