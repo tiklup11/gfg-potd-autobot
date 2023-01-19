@@ -1,5 +1,5 @@
-module.exports = {
-    tiklup1729Cookies: [
+module.exports =
+    [
         {
             "name": "_ga",
             "value": "GA1.1.608757559.1665557146",
@@ -194,4 +194,3 @@ module.exports = {
             "storeId": null
         }
     ]
-}

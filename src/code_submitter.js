@@ -11,22 +11,21 @@ const formData = {
     'code': '',
     'language': 'cpp'
 };
-const cookie = constants.tiklup1729_GFG_Cookie
 
 const options = {
     url: '',
     method: 'POST',
     formData: formData,
     headers: {
-        'Cookie': cookie,
+        Cookie: '',
         'Sec-Ch-Ua': '(Not(A:Brand";v="8", "Chromium";v="101"',
         'Sec-Ch-Ua-Mobile': '?0'
     }
 };
 
-function getSubmittionId(userCode, code, qid) {
+function getSubmittionId(userCode, code, qid, userCookie) {
 
-    initHeaders(qid, code, userCode);
+    initOptionsAndHeader(qid, code, userCode, userCookie);
 
     return new Promise((resolve, reject) => {
         request(options, (error, response, body) => {
@@ -40,18 +39,23 @@ function getSubmittionId(userCode, code, qid) {
     })
 }
 
-function initHeaders(qid, code, userCode) {
+function initOptionsAndHeader(qid, code, userCode, userCookie) {
     const endpoint = hostName + "/api/latest/problems/" + qid + "/compile/";
     options.url = endpoint;
 
     formData.code = code;
     formData.userCode = userCode;
     options.formData = formData;
+    options.headers = {
+        'Cookie': userCookie,
+        'Sec-Ch-Ua': '(Not(A:Brand";v="8", "Chromium";v="101"',
+        'Sec-Ch-Ua-Mobile': '?0'
+    }
 }
 
-function getSubmittionResult(submissionId) {
+function getSubmittionResult(submissionId, userCookie) {
 
-    initHeadersAndFormData(submissionId);
+    initHeadersAndFormData(submissionId, userCookie);
 
     return new Promise((resolve, reject) => {
         request(options, (error, response, body) => {
@@ -66,7 +70,7 @@ function getSubmittionResult(submissionId) {
     })
 }
 
-function initHeadersAndFormData(submissionId) {
+function initHeadersAndFormData(submissionId, userCookie) {
     const endpoint = hostName + "/api/latest/problems/submission/result/ ";
     options.url = endpoint;
 
@@ -75,17 +79,24 @@ function initHeadersAndFormData(submissionId) {
         'sub_type': 'solutionCheck',
     };
     options.formData = formData;
+    options.headers = {
+        'Cookie': userCookie,
+        'Sec-Ch-Ua': '(Not(A:Brand";v="8", "Chromium";v="101"',
+        'Sec-Ch-Ua-Mobile': '?0'
+    }
+
+
 }
 
-async function submit(mycode, code, qid) {
-    const subid = await getSubmittionId(mycode, code, qid);
+async function submit(mycode, code, qid, userCookie) {
+    const subid = await getSubmittionId(mycode, code, qid, userCookie);
 
-    const res = await submitSolutionAndTryGettingValidStatus(subid)
+    const res = await submitSolutionAndTryGettingValidStatus(subid, userCookie)
     return res;
 }
 
 
-async function submitSolutionAndTryGettingValidStatus(subid) {
+async function submitSolutionAndTryGettingValidStatus(subid, userCookie) {
     var tryingCount = 0;
     var maxTryCount = 5;
 
@@ -95,7 +106,7 @@ async function submitSolutionAndTryGettingValidStatus(subid) {
         await waitForSeconds(6)
 
         // console.log(`trying count : ${tryingCount}`)
-        const res = await getSubmittionResult(subid)
+        const res = await getSubmittionResult(subid, userCookie)
         response = res
 
         if (res.status === "QUEUED") {

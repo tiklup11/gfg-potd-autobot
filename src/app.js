@@ -5,6 +5,7 @@ const codeMerger = require('./code_merger.js')
 const urlFetcher = require('./url_fetcher')
 const cron = require('node-cron');
 const mailSender = require('./services/mail_sender')
+const userData = require('./const/users.js')
 
 function main() {
     // runSchedular()
@@ -24,15 +25,24 @@ function runSchedular() {
 
 //operations
 async function executeScript() {
-    const qid = await urlFetcher.fetchPOTD_QID();
-    // const qid = "ec277982aea7239b550b28421e00acbb1ea03d2c"
-    const driverCode = await codeFetcher.fetchStarterCode(qid)
-    const solutionCode = await codeFetcher.fetchSolutionCode(qid)
 
-    const finalCode = codeMerger.mergeCode(solutionCode, driverCode)
-    const { result, response } = await codeSubmitter.submit(solutionCode, finalCode, qid)
-    console.log("email response : ", response)
-    mailSender.sendMail("tiklup1729@gmail.com", response)
+    userData.forEach(async (user) => {
+        await solveQuestionAndNotify(user.cookie);
+    })
+
 }
 
 main()
+
+
+async function solveQuestionAndNotify(userCookie) {
+    const qid = await urlFetcher.fetchPOTD_QID();
+    // const qid = "ec277982aea7239b550b28421e00acbb1ea03d2c"
+    const driverCode = await codeFetcher.fetchStarterCode(qid);
+    const solutionCode = await codeFetcher.fetchSolutionCode(qid);
+
+    const completeCode = codeMerger.mergeCode(solutionCode, driverCode);
+    const { result, response } = await codeSubmitter.submit(solutionCode, completeCode, qid, userCookie);
+    console.log("email response : ", response);
+    mailSender.sendMail("tiklup1729@gmail.com", response);
+}
