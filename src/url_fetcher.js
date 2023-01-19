@@ -4,6 +4,7 @@ const constants = require('./const/constants')
 
 
 const potdURL = constants.hostName + "/api/v1/problems-of-day/problem/today/"
+const problemUrl = '';
 
 function getProblemUrl() {
     return new Promise((resolve, reject) => {
@@ -32,12 +33,14 @@ function getQuestionIdFromURL(url) {
 
 async function fetchPOTD_QID() {
     const qUrl = await getProblemUrl();
+    questionUrl = qUrl
     return getQuestionIdFromURL(qUrl)
 }
 
 
 module.exports = {
-    fetchPOTD_QID
+    fetchPOTD_QID,
+    problemUrl,
 }
 
 // console.log(

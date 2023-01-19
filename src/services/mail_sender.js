@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer')
+const url_fetcher = require('../url_fetcher')
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -37,5 +38,18 @@ function sendMail(to, message) {
 
 
 function makeHTML_Body(body) {
-    return `<h1>HELLO BOSS</h1><h2>I am Anshuman, gfg-potd-solver-bot created by pulkit</h2><br>${body}`
+
+    const qUrl = url_fetcher.problemUrl
+    let date = new Date();
+    date = date.toLocaleDateString();
+
+    console.log("q-url => ", qUrl)
+    return `<h1>HELLO BOSS</h1>
+    <h2>I am Anshuman, gfg-potd-solver-bot created by pulkit</h2>
+    <br>
+    <h4>Report for POTD of ${date}</h4>
+    <a href=${qUrl}>${qUrl}<a/>
+    <pre>${body}</pre>`
 }
+
+module.exports = { sendMail }

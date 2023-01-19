@@ -32,7 +32,7 @@ function fetchStarterCode(qid) {
 }
 
 //e9e2da3de3eb35679ca7e17b752ae877635f1a26
-// fetchStarterCode("e9e2da3de3eb35679ca7e17b752ae877635f1a26")
+// fetchStarterCode("1646a9b5169d7571cf672f2a31533af083d1f479")
 
 function fetchSolutionCode(qid) {
 
@@ -57,18 +57,18 @@ function fetchSolutionCode(qid) {
     });
 }
 
-
-// async function test() {
-//     const code = await fetchStarterCode("6eb51dc638ee1b936f38d1ab4b2f7062d4425463")
-//     const mycode = await fetchSolutionCode("6eb51dc638ee1b936f38d1ab4b2f7062d4425463")
-//     console.log("------------------code-----------------------")
-//     console.log(code)
-//     console.log("------------------mycode---------------------")
-//     console.log(mycode)
-//     const merged = merger.mergeCode(mycode, code)
-//     console.log(merged)
-// }
-// test()
+////Position this line where user code will be pasted.
+async function test() {
+    const code = await fetchStarterCode("1646a9b5169d7571cf672f2a31533af083d1f479")
+    const mycode = await fetchSolutionCode("1646a9b5169d7571cf672f2a31533af083d1f479")
+    // console.log("------------------code-----------------------")
+    // console.log(code)
+    // console.log("------------------mycode---------------------")
+    // console.log(mycode)
+    // const merged = merger.mergeCode(mycode, code)
+    // console.log(merged)
+}
+test()
 
 
 module.exports = {
