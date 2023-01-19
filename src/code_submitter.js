@@ -1,4 +1,4 @@
-const constants = require('./constants')
+const constants = require('./const/constants')
 
 const request = require('request');
 
@@ -11,7 +11,7 @@ const formData = {
     'code': '//{ Driver Code Starts\n#include <bits/stdc++.h>\nusing namespace std;\n\nstruct Node\n{\n    int data;\n    struct Node *left;\n    struct Node *right;\n\n    Node(int val) {\n        data = val;\n        left = right = NULL;\n    }\n}; \n\n// } Driver Code Ends\n',
     'language': 'cpp'
 };
-const cookie = constants.coo
+const cookie = constants.tiklup1729_GFG_Cookie
 
 const options = {
     url: '',
@@ -77,7 +77,7 @@ function getSubmittionResult(submissionId) {
 async function submit(mycode, code, qid) {
     const subid = await getSubmittionId(mycode, code, qid);
     const res = await getSubmittionResult(subid)
-    // console.log(res);
+    console.log(res);
     return res;
 
 }

@@ -1,6 +1,6 @@
 const request = require('request');
 
-const constants = require('./constants')
+const constants = require('./const/constants')
 
 
 const potdURL = constants.hostName + "/api/v1/problems-of-day/problem/today/"

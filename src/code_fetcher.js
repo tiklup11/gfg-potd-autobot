@@ -1,13 +1,14 @@
 const request = require('request');
 
-const constants = require('./constants')
+const constants = require('./const/constants')
+
 const merger = require('./code_merger')
 
 var options = {
     url: '',
     json: true,
     headers: {
-        'Cookie': constants.solveCoo
+        'Cookie': constants.solution_Cookie
     }
 };
 
@@ -29,6 +30,9 @@ function fetchStarterCode(qid) {
         });
     });
 }
+
+//e9e2da3de3eb35679ca7e17b752ae877635f1a26
+// fetchStarterCode("e9e2da3de3eb35679ca7e17b752ae877635f1a26")
 
 function fetchSolutionCode(qid) {
 
@@ -54,17 +58,17 @@ function fetchSolutionCode(qid) {
 }
 
 
-async function main() {
-    const code = await fetchStarterCode("6eb51dc638ee1b936f38d1ab4b2f7062d4425463")
-    const mycode = await fetchSolutionCode("6eb51dc638ee1b936f38d1ab4b2f7062d4425463")
-    console.log("------------------code-----------------------")
-    console.log(code)
-    console.log("------------------mycode---------------------")
-    console.log(mycode)
-    const merged = merger.mergeCode(mycode, code)
-    console.log(merged)
-}
-main()
+// async function test() {
+//     const code = await fetchStarterCode("6eb51dc638ee1b936f38d1ab4b2f7062d4425463")
+//     const mycode = await fetchSolutionCode("6eb51dc638ee1b936f38d1ab4b2f7062d4425463")
+//     console.log("------------------code-----------------------")
+//     console.log(code)
+//     console.log("------------------mycode---------------------")
+//     console.log(mycode)
+//     const merged = merger.mergeCode(mycode, code)
+//     console.log(merged)
+// }
+// test()
 
 
 module.exports = {

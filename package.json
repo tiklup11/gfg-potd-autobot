@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "js-beautify": "^1.14.7",
+    "node-cron": "^3.0.2",
+    "nodemailer": "^6.9.0",
     "request": "^2.88.2"
   }
 }

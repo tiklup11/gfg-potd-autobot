@@ -2,25 +2,28 @@
 const codeFetcher = require('./code_fetcher')
 const codeSubmitter = require('./code_submitter')
 const codeMerger = require('./code_merger.js')
+const urlFetcher = require('./url_fetcher')
+const cron = require('node-cron');
 
-async function main() {
+function main() {
+    runSchedular()
+}
 
-    // const qid = await urlFetcher.fetchPOTD_QID();
-    const qid = "44bb5287b98797782162ffe3d2201621f6343a4b"
+// schedule a job to run every day at 6pm
+function runSchedular() {
+    cron.schedule('0 0 18 * * *', () => {
+        executeScript()
+    });
+}
+
+//operations
+async function executeScript() {
+    const qid = await urlFetcher.fetchPOTD_QID();
     const startCode = await codeFetcher.fetchStarterCode(qid)
     const solvedCode = await codeFetcher.fetchSolutionCode(qid)
 
     const finalCode = codeMerger.mergeCode(solvedCode, startCode)
     const responseCode = await codeSubmitter.submit(solvedCode, finalCode, qid)
-
-    if (responseCode == 1) {
-        console.log("success")
-    } else {
-        console.log("failed")
-    }
 }
-
-
-
 
 main()
