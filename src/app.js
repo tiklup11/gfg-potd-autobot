@@ -15,7 +15,7 @@ main()
 
 function main() {
     runSchedular()
-    enableWebPageRoutes();
+    // enableWebPageRoutes();
     // executeScript()
 }
 
@@ -34,35 +34,37 @@ function runSchedular() {
 
     const randomHour = Math.floor(Math.random() * (6 - 0 + 1) + 0);
     const timeOfDay = 12 + randomHour
+    const oneHourBefore = timeOfDay - 1;
 
-    cron.schedule(`0 0 20 * * *`, () => {
-        executeScript()
+    cron.schedule(`0 0 ${oneHourBefore} * * *`, () => {
+        sendAliveMail()
     });
 
-    // cron.schedule(`0 0 ${timeOfDay} * * *`, () => {
-    //     executeScript()
-    // });
+    cron.schedule(`0 0 ${timeOfDay} * * *`, () => {
+        executeScript()
+    });
 }
+
+
+function sendAliveMail() {
+    mailSender.sendMail("tiklup1729@gmail.com", "Hello BOSS, don't worry, I am alive and will do the POTD after one hour");
+}
+
+
 
 //operations
 async function executeScript() {
 
     console.log("getting potd id....")
     const qid = await urlFetcher.fetchPOTD_QID();
-    console.log("POTD ID : ", qid)
 
     // const qid = "ec277982aea7239b550b28421e00acbb1ea03d2c"
     console.log("getting driver code....")
     const driverCode = await codeFetcher.fetchStarterCode(qid);
-    console.log("--------------driver code-------------")
-    console.log(driverCode)
-    console.log("--------------------------------------")
+
 
     console.log("getting solution code....")
     const solutionCode = await codeFetcher.fetchSolutionCode(qid);
-    console.log("--------------solution code-----------")
-    console.log(solutionCode)
-    console.log("--------------------------------------")
 
     const completeCode = codeMerger.mergeCode(solutionCode, driverCode);
 
@@ -80,7 +82,8 @@ async function executeScript() {
 async function submitCodeAndNotify(solutionCode, completeCode, qid, user) {
     try {
         const { result, response } = await codeSubmitter.submit(solutionCode, completeCode, qid, user.cookie);
-        console.log("email response : ", response);
+        console.log("sending mail to ", user.name)
+        // console.log("email body : ", response);
         await mailSender.sendMail(user.email, response);
     } catch (error) {
         console.log(error)

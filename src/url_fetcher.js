@@ -2,7 +2,6 @@ const request = require('request');
 
 const constants = require('./const/constants')
 
-
 const potdURL = constants.hostName + "/api/v1/problems-of-day/problem/today/"
 const problemUrl = '';
 
@@ -41,6 +40,7 @@ async function fetchPOTD_QID() {
 module.exports = {
     fetchPOTD_QID,
     problemUrl,
+    getProblemUrl
 }
 
 // console.log(

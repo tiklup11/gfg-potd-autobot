@@ -89,28 +89,32 @@ function initHeadersAndFormData(submissionId, userCookie) {
 }
 
 async function submit(mycode, code, qid, userCookie) {
-    const subid = await getSubmittionId(mycode, code, qid, userCookie);
-
-    const res = await submitSolutionAndTryGettingValidStatus(subid, userCookie)
+    var res = {};
+    try {
+        const subid = await getSubmittionId(mycode, code, qid, userCookie);
+        res = await submitSolutionAndTryGettingValidStatus(subid, userCookie)
+    } catch (error) {
+        res = { result: false, response: error }
+    }
     return res;
 }
 
 
 async function submitSolutionAndTryGettingValidStatus(subid, userCookie) {
     var tryingCount = 0;
-    var maxTryCount = 5;
+    var maxTryCount = 10;
 
     var response = {}
     while (tryingCount < maxTryCount) {
 
-        await waitForSeconds(6)
+        await waitForSeconds(10)
 
         // console.log(`trying count : ${tryingCount}`)
         const res = await getSubmittionResult(subid, userCookie)
         response = res
 
         if (res.status === "QUEUED") {
-            console.log("trying again in 6 seconds")
+            console.log("trying again in 10 seconds")
         } else {
             return formatMessage(response);
         }

@@ -9,8 +9,8 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     port: 587,
     auth: {
-        user: '2019uch0019@iitjammu.ac.in',
-        pass: 'elzdnvoziwvpyddu'
+        user: 'gfg.p0td.b0t@gmail.com',
+        pass: 'fkwkkoqnuyntmbep'
     }
 });
 
@@ -25,29 +25,38 @@ const mailOptions = {
 // sendMail('tiklup1729@gmail.com', "1,2,3,4")
 
 
-function sendMail(to, message) {
+async function sendMail(to, message) {
+    if (message === null) {
+        message = "Some error occured on submiting your POTD for today, Please update your cookies or LOSE your freebies."
+    }
     mailOptions.to = to
-    mailOptions.html = makeHTML_Body(message)
+    mailOptions.html = await makeHTML_Body(message)
     return new Promise((resolve, reject) => {
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log(`Email sent: ${info.response}`);
-            }
-        });
+        try {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    reject(error)
+                } else {
+                    console.log(`Email sent: ${info.response}`);
+                    resolve(info)
+                }
+            });
+        } catch (error) {
+            reject(error)
+        }
+
     })
 }
 
 
-function makeHTML_Body(body) {
+async function makeHTML_Body(body) {
 
-    const qUrl = url_fetcher.problemUrl
-
+    const qUrl = await url_fetcher.getProblemUrl()
 
     console.log("q-url => ", qUrl)
     return `<h1>HELLO BOSS</h1>
-    <h2>I am Anshuman, gfg-potd-solver-bot created by pulkit</h2>
+    <h2>gfg-potd-solver-bot created by pulkit</h2>
     <br>
     <h4>Report for POTD of ${date}</h4>
     <a href=${qUrl}>${qUrl}<a/>
