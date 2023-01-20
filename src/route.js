@@ -43,7 +43,7 @@ router.post('/adduser', async (req, res) => {
 
 })
 
-router.post('/updateCookie', async (req, res) => {
+router.post('/update_cookie', async (req, res) => {
 
     var { email, cookie, userpass } = req.body;
 

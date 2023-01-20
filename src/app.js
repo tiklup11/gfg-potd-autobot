@@ -5,7 +5,7 @@ const codeMerger = require('./code_merger.js')
 const urlFetcher = require('./url_fetcher')
 const cron = require('node-cron');
 const mailSender = require('./services/mail_sender')
-const userDB = require('./const/users.js')
+const dbService = require('./services/firestore')
 
 const express = require('express')
 const app = express()
@@ -15,8 +15,8 @@ main()
 
 function main() {
     // runSchedular()
-    enableWebPageRoutes();
-    // executeScript()
+    // enableWebPageRoutes();
+    executeScript()
 }
 
 
@@ -62,7 +62,10 @@ async function executeScript() {
 
     const completeCode = codeMerger.mergeCode(solutionCode, driverCode);
 
-    userDB.allUsers.forEach(async (user) => {
+    const allUsers = await dbService.getAllUsers();
+
+    allUsers.forEach(async (user) => {
+        console.log("USER LOGING : ", user)
         console.log("doing submittion for ", user.name)
         await submitCodeAndNotify(solutionCode, completeCode, qid, user);
         console.log("submitted.")
@@ -71,9 +74,13 @@ async function executeScript() {
 
 
 async function submitCodeAndNotify(solutionCode, completeCode, qid, user) {
-    const { result, response } = await codeSubmitter.submit(solutionCode, completeCode, qid, userDB.tiklup1729_GFG_Cookie);
-    console.log("email response : ", response);
+    try {
+        const { result, response } = await codeSubmitter.submit(solutionCode, completeCode, qid, user.email);
+        console.log("email response : ", response);
 
-    mailSender.sendMail(user.email, response);
+    } catch (error) {
+        console.log(error)
+    }
+
+    await mailSender.sendMail(user.email, response);
 }
-

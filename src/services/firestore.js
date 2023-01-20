@@ -16,6 +16,10 @@ async function test() {
 }
 // test()
 
+async function getAllUsers() {
+    return getAllDocsFromACollection("users")
+}
+
 async function getAllDocsFromACollection(collectionName) {
     const collectionRef = db.collection(collectionName);
     const allUsers = []
@@ -23,7 +27,7 @@ async function getAllDocsFromACollection(collectionName) {
         const snapshot = await collectionRef.get();
         snapshot.forEach(doc => {
             console.log(doc.id, '=>', doc.data());
-            allUsers.add(doc)
+            allUsers.push(doc.data())
         });
         return allUsers;
     } catch (error) {
@@ -67,4 +71,4 @@ async function updateCookie(newCookie, email, password) {
 
 
 
-module.exports = { addUserToFirestore, updateCookie }
+module.exports = { addUserToFirestore, updateCookie, getAllUsers }
