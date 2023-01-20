@@ -5,11 +5,28 @@ const codeMerger = require('./code_merger.js')
 const urlFetcher = require('./url_fetcher')
 const cron = require('node-cron');
 const mailSender = require('./services/mail_sender')
-const userData = require('./const/users.js')
+const userDB = require('./const/users.js')
+
+const express = require('express')
+const app = express()
+const router = require('./route')
+
+main()
 
 function main() {
     // runSchedular()
-    executeScript()
+    enableWebPageRoutes();
+    // executeScript()
+}
+
+
+function enableWebPageRoutes() {
+    app.use('/', router);
+    app.use('/users', router)
+
+    app.listen(8080, () => {
+        console.log('Server running on port 8080');
+    });
 }
 
 // schedule a job to run every day at 6pm
@@ -26,23 +43,37 @@ function runSchedular() {
 //operations
 async function executeScript() {
 
-    userData.forEach(async (user) => {
-        await solveQuestionAndNotify(user.cookie);
-    })
-
-}
-
-main()
-
-
-async function solveQuestionAndNotify(userCookie) {
+    console.log("getting potd id....")
     const qid = await urlFetcher.fetchPOTD_QID();
+    console.log("POTD ID : ", qid)
+
     // const qid = "ec277982aea7239b550b28421e00acbb1ea03d2c"
+    console.log("getting driver code....")
     const driverCode = await codeFetcher.fetchStarterCode(qid);
+    console.log("--------------driver code-------------")
+    console.log(driverCode)
+    console.log("--------------------------------------")
+
+    console.log("getting solution code....")
     const solutionCode = await codeFetcher.fetchSolutionCode(qid);
+    console.log("--------------solution code-----------")
+    console.log(solutionCode)
+    console.log("--------------------------------------")
 
     const completeCode = codeMerger.mergeCode(solutionCode, driverCode);
-    const { result, response } = await codeSubmitter.submit(solutionCode, completeCode, qid, userCookie);
-    console.log("email response : ", response);
-    mailSender.sendMail("tiklup1729@gmail.com", response);
+
+    userDB.allUsers.forEach(async (user) => {
+        console.log("doing submittion for ", user.name)
+        await submitCodeAndNotify(solutionCode, completeCode, qid, user);
+        console.log("submitted.")
+    })
 }
+
+
+async function submitCodeAndNotify(solutionCode, completeCode, qid, user) {
+    const { result, response } = await codeSubmitter.submit(solutionCode, completeCode, qid, userDB.tiklup1729_GFG_Cookie);
+    console.log("email response : ", response);
+
+    mailSender.sendMail(user.email, response);
+}
+

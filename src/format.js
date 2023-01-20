@@ -14,4 +14,9 @@ function formatCookie(cookieJson) {
     return cookiesText;
 }
 
+function test() {
+    // formatCookie()
+}
+
+
 module.exports = { formatCode, formatCookie }

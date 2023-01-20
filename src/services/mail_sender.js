@@ -1,6 +1,9 @@
 const nodemailer = require('nodemailer')
 const url_fetcher = require('../url_fetcher')
 
+let date = new Date();
+date = date.toLocaleDateString();
+
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     service: 'gmail',
@@ -14,7 +17,7 @@ const transporter = nodemailer.createTransport({
 const mailOptions = {
     from: 'gfg-potd-bot@developed-by-pulkit.com',
     to: '',
-    subject: 'GFG-BOT',
+    subject: `GFG-POTD Report [${date}]`,
     text: '',
     html: ''
 };
@@ -40,8 +43,7 @@ function sendMail(to, message) {
 function makeHTML_Body(body) {
 
     const qUrl = url_fetcher.problemUrl
-    let date = new Date();
-    date = date.toLocaleDateString();
+
 
     console.log("q-url => ", qUrl)
     return `<h1>HELLO BOSS</h1>
