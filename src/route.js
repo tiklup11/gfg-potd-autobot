@@ -27,7 +27,11 @@ router.get('/styles.css', (req, res) => {
 
 router.post('/adduser', async (req, res) => {
 
-    var { name, email, cookie, adminpassword } = req.body;
+    var { name, email, cookie, adminpassword, userpass } = req.body;
+
+    if (checkValidations(name, email, cookie, userpass) === false) {
+        return res.send("All fields are required")
+    }
 
     if (isJson(cookie) === false) {
         return res.send("Cookie must be in JSON format, use Cookie-editor extension to get cookies")
@@ -35,13 +39,21 @@ router.post('/adduser', async (req, res) => {
 
     if (adminpassword === "niceone") {
         cookie = formatter.formatCookie(JSON.parse(cookie))
-        await db_service.addUserToFirestore({ name: name, email: email, cookie: cookie })
+        await db_service.addUserToFirestore({ name: name, email: email, cookie: cookie, userpass: userpass })
         return res.send('User added')
     } else {
-        return res.send("Admin k pass ja bhai")
+        return res.send("Admin Pass required")
     }
 
 })
+
+function checkValidations(name, email, cookie, userpass) {
+    if (name.trim() === "" || email.trim() === "" || cookie.trim() === "" || userpass.trim() === "") {
+        return false;
+    }
+    return true;
+}
+
 
 router.post('/update_cookie', async (req, res) => {
 
@@ -50,7 +62,7 @@ router.post('/update_cookie', async (req, res) => {
     if (isJson(cookie) === false) {
         return res.send("Cookie must be in JSON format, use Cookie-editor extension to get cookies")
     }
-    return res.send(db_service.updateCookie(cookie, email, userpass))
+    return res.send(await db_service.updateCookie(cookie, email, userpass))
 
 })
 

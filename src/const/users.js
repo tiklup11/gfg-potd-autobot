@@ -3,7 +3,7 @@ const formatter = require('../format')
 const tiklup1729_GFG_Cookie = formatter.formatCookie(require('./tiklup1729_cookie'));
 const yash_GFG_Cookie = formatter.formatCookie(require('./yash_cookie'))
 
-// console.log(yash_GFG_Cookie)
+console.log(tiklup1729_GFG_Cookie)
 
 const allUsers = [
     {

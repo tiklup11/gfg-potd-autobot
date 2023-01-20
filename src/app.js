@@ -14,9 +14,9 @@ const router = require('./route')
 main()
 
 function main() {
-    // runSchedular()
-    // enableWebPageRoutes();
-    executeScript()
+    runSchedular()
+    enableWebPageRoutes();
+    // executeScript()
 }
 
 
@@ -35,9 +35,13 @@ function runSchedular() {
     const randomHour = Math.floor(Math.random() * (6 - 0 + 1) + 0);
     const timeOfDay = 12 + randomHour
 
-    cron.schedule(`0 0 ${timeOfDay} * * *`, () => {
+    cron.schedule(`0 0 20 * * *`, () => {
         executeScript()
     });
+
+    // cron.schedule(`0 0 ${timeOfDay} * * *`, () => {
+    //     executeScript()
+    // });
 }
 
 //operations
@@ -75,12 +79,11 @@ async function executeScript() {
 
 async function submitCodeAndNotify(solutionCode, completeCode, qid, user) {
     try {
-        const { result, response } = await codeSubmitter.submit(solutionCode, completeCode, qid, user.email);
+        const { result, response } = await codeSubmitter.submit(solutionCode, completeCode, qid, user.cookie);
         console.log("email response : ", response);
-
+        await mailSender.sendMail(user.email, response);
     } catch (error) {
         console.log(error)
     }
 
-    await mailSender.sendMail(user.email, response);
 }
