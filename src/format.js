@@ -8,15 +8,22 @@ function formatCode(code) {
 
 function formatCookie(cookieJson) {
     let cookiesText = "";
+
+    cookieJson = formatIfCookieLenghtIsNotDefined(cookieJson);
+
     for (let i = 0; i < cookieJson.length; i++) {
         cookiesText += cookieJson[i].name + "=" + cookieJson[i].value + "; ";
     }
     return cookiesText;
 }
 
-function test() {
-    // formatCookie()
+function formatIfCookieLenghtIsNotDefined(cookieJson) {
+    if (!cookieJson.length) {
+        cookieJson = [cookieJson];
+    }
+    return cookieJson;
 }
+
 
 
 module.exports = { formatCode, formatCookie }

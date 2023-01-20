@@ -2,6 +2,8 @@ const { async } = require('@firebase/util');
 const { initializeApp, applicationDefault, cert } = require('firebase-admin/app');
 const { getFirestore, Timestamp, FieldValue } = require('firebase-admin/firestore');
 
+const cookieHelper = require('../cookie_helper')
+
 const serviceAccount = require('./serviceApiKey.json');
 
 initializeApp({
@@ -56,10 +58,13 @@ async function updateCookie(newCookie, email, password) {
     if (!userSnapshot.empty) {
         let user = userSnapshot.docs[0].data();
         // check if password is correct
-        let isPasswordCorrect = password === (user.password);
+        let isPasswordCorrect = password === (user.userpass);
         if (isPasswordCorrect) {
             // update username
-            userRef.doc(userSnapshot.docs[0].id).update({ cookie: newCookie });
+            console.log("previous cookie :: ", newCookie)
+            newCookie = cookieHelper.convertJSON_CookieToOtherFormat(newCookie)
+            console.log("new cookie :: ", newCookie)
+            userSnapshot.docs[0].ref.update({ cookie: newCookie });
             return ('cookie updated successfully');
         } else {
             return ('Incorrect password');
