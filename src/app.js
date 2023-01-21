@@ -11,11 +11,12 @@ const express = require('express')
 const app = express()
 const router = require('./route')
 
+
 main()
 
 function main() {
     runSchedular()
-    // enableWebPageRoutes();
+    enableWebPageRoutes();
     // executeScript()
 }
 
@@ -28,6 +29,7 @@ function enableWebPageRoutes() {
         console.log('Server running on port 8080');
     });
 }
+
 
 // schedule a job to run every day at 6pm
 function runSchedular() {
@@ -50,18 +52,16 @@ function sendAliveMail() {
     mailSender.sendMail("tiklup1729@gmail.com", "Hello BOSS, don't worry, I am alive and will do the POTD after one hour");
 }
 
-
-
 //operations
 async function executeScript() {
 
     console.log("getting potd id....")
-    const qid = await urlFetcher.fetchPOTD_QID();
+    // const qid = await urlFetcher.fetchPOTD_QID();
+    const qid = "asteroid-collision"
 
     // const qid = "ec277982aea7239b550b28421e00acbb1ea03d2c"
     console.log("getting driver code....")
     const driverCode = await codeFetcher.fetchStarterCode(qid);
-
 
     console.log("getting solution code....")
     const solutionCode = await codeFetcher.fetchSolutionCode(qid);
@@ -77,16 +77,19 @@ async function executeScript() {
         console.log("submitted.")
     })
 }
+// asteroid-collision
+async function test() {
 
+}
 
+//TODO : add username to mail
 async function submitCodeAndNotify(solutionCode, completeCode, qid, user) {
     try {
         const { result, response } = await codeSubmitter.submit(solutionCode, completeCode, qid, user.cookie);
-        console.log("sending mail to ", user.name)
+        console.log("sending mail to ", user.name, " ", user.email)
         // console.log("email body : ", response);
         await mailSender.sendMail(user.email, response);
     } catch (error) {
         console.log(error)
     }
-
 }
