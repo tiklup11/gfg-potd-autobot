@@ -24,7 +24,7 @@ function enableWebPageRoutes() {
     app.use('/users', router)
 
 
-    const port = 8000 || process.env.PORT
+    const port = process.env.PORT || 1289
     app.listen(port, () => {
         console.log('Server runningggg on port ', port);
     });
