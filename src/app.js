@@ -2,7 +2,6 @@
 const codeFetcher = require('./code_fetcher')
 const codeSubmitter = require('./code_submitter')
 const codeMerger = require('./code_merger.js')
-const urlFetcher = require('./url_fetcher')
 const cron = require('node-cron');
 const mailSender = require('./services/mail_sender')
 const dbService = require('./services/firestore')
@@ -10,7 +9,6 @@ const dbService = require('./services/firestore')
 const express = require('express')
 const app = express()
 const router = require('./route')
-
 
 main()
 
@@ -46,7 +44,6 @@ function runSchedular() {
         executeScript()
     });
 }
-
 
 function sendAliveMail() {
     mailSender.sendMail("tiklup1729@gmail.com", "Hello BOSS, don't worry, I am alive and will do the POTD after one hour");
