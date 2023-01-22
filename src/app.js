@@ -26,7 +26,7 @@ function enableWebPageRoutes() {
 
     const port = 8000 || process.env.PORT
     app.listen(port, () => {
-        console.log('Server running on port 8080');
+        console.log('Server runningggg on port ', port);
     });
 }
 
