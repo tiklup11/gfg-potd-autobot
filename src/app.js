@@ -23,7 +23,9 @@ function enableWebPageRoutes() {
     app.use('/', router);
     app.use('/users', router)
 
-    app.listen(8080, () => {
+
+    const port = 8000 || process.env.PORT
+    app.listen(port, () => {
         console.log('Server running on port 8080');
     });
 }
@@ -32,7 +34,8 @@ function enableWebPageRoutes() {
 // schedule a job to run every day at 6pm
 function runSchedular() {
 
-    const randomHour = Math.floor(Math.random() * (6 - 0 + 1) + 0);
+    // const randomHour = Math.floor(Math.random() * (6 - 0 + 1) + 0);
+    const randomHour = 3
     const timeOfDay = 12 + randomHour
     const oneHourBefore = timeOfDay - 1;
 
