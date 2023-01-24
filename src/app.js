@@ -62,8 +62,8 @@ function sendAliveMail() {
 async function executeScript() {
 
     console.log("getting potd id....")
-    // const qid = await urlFetcher.fetchPOTD_QID();
-    const qid = "asteroid-collision"
+    const qid = await urlFetcher.fetchPOTD_QID();
+    // const qid = "asteroid-collision"
 
     // const qid = "ec277982aea7239b550b28421e00acbb1ea03d2c"
     console.log("getting driver code....")
