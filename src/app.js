@@ -29,6 +29,10 @@ function enableWebPageRoutes() {
         executeScript()
     })
 
+    app.get('/test', (req, res) => {
+        res.send("checking, sending you a alive mail")
+        sendAliveMail()
+    })
 
     const port = process.env.PORT || 1289
     app.listen(port, () => {

@@ -23,7 +23,7 @@ const mailOptions = {
     html: ''
 };
 
-sendMail('tiklup1729@gmail.com', "1,2,3,4")
+// sendMail('tiklup1729@gmail.com', "1,2,3,4")
 
 
 async function sendMail(to, message) {
@@ -50,11 +50,6 @@ async function sendMail(to, message) {
     })
 }
 
-sendAliveMail();
-
-function sendAliveMail() {
-    sendMail("tiklup1729@gmail.com", "Hello BOSS, don't worry, I am alive and will do the POTD after one hour");
-}
 
 
 async function makeHTML_Body(body) {
