@@ -23,7 +23,7 @@ const mailOptions = {
     html: ''
 };
 
-// sendMail('tiklup1729@gmail.com', "1,2,3,4")
+sendMail('tiklup1729@gmail.com', "1,2,3,4")
 
 
 async function sendMail(to, message) {

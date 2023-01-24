@@ -15,8 +15,8 @@ main()
 
 function main() {
     // runSchedular()
-    // enableWebPageRoutes();
-    executeScript()
+    enableWebPageRoutes();
+    // executeScript()
 }
 
 
@@ -26,6 +26,7 @@ function enableWebPageRoutes() {
 
     app.get('/run', (req, res) => {
         res.send("running, you will get the mail")
+        executeScript()
     })
 
 
@@ -81,10 +82,6 @@ async function executeScript() {
         await submitCodeAndNotify(solutionCode, completeCode, qid, user);
         console.log("submitted.")
     })
-}
-// asteroid-collision
-async function test() {
-
 }
 
 //TODO : add username to mail
