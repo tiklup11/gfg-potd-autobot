@@ -2,6 +2,7 @@
 const codeFetcher = require('./code_fetcher')
 const codeSubmitter = require('./code_submitter')
 const codeMerger = require('./code_merger.js')
+const urlFetcher = require('./url_fetcher')
 const cron = require('node-cron');
 const mailSender = require('./services/mail_sender')
 const dbService = require('./services/firestore')
@@ -13,15 +14,19 @@ const router = require('./route')
 main()
 
 function main() {
-    runSchedular()
-    enableWebPageRoutes();
-    // executeScript()
+    // runSchedular()
+    // enableWebPageRoutes();
+    executeScript()
 }
 
 
 function enableWebPageRoutes() {
     app.use('/', router);
     app.use('/users', router)
+
+    app.get('/run', (req, res) => {
+        res.send("running, you will get the mail")
+    })
 
 
     const port = process.env.PORT || 1289
