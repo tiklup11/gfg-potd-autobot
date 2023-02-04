@@ -18,27 +18,30 @@ async function test() {
 }
 // test()
 
-async function getAllUsers() {
-    return getAllDocsFromACollection("users")
+async function getAllUsers(qid) {
+    return getAllDocsFromACollection("users", qid)
 }
 
-async function getAllDocsFromACollection(collectionName) {
+async function getAllDocsFromACollection(collectionName, qid) {
     const collectionRef = db.collection(collectionName);
     const allUsers = []
     try {
-        const snapshot = await collectionRef.get();
+        const snapshot = await collectionRef.where("last_ques_id", "!=", qid).get(); //qid, where [last_ques_id]!=qid
         snapshot.forEach(doc => {
             console.log(doc.id, '=>', doc.data());
             allUsers.push(doc.data())
         });
+        console.log("all unsolved user len : ", allUsers.length)
         return allUsers;
     } catch (error) {
         console.log('Error getting documents', error);
-        return error
+        return allUsers
     }
 }
 
 async function addUserToFirestore(userData) {
+    userData['solved_ques_count'] = 0;
+    userData['last_ques_id'] = "";
     try {
         const ref = await db.collection('users').add(userData);
         console.log(`Added user with ID: ${ref.id}`);
@@ -46,6 +49,20 @@ async function addUserToFirestore(userData) {
     } catch (error) {
         console.log('Error adding user: ', error);
         throw error;
+    }
+}
+
+async function updateQuestionCnt(email, qid) {
+
+    try {
+        let userRef = db.collection('users').where('email', '==', email);
+        let userSnapshot = await userRef.get();
+        if (!userSnapshot.empty) {
+            let user = userSnapshot.docs[0].data();
+            userSnapshot.docs[0].ref.update({ solved_ques_count: FieldValue.increment(1), last_ques_id: qid });
+        }
+    } catch (error) {
+
     }
 }
 
@@ -76,4 +93,4 @@ async function updateCookie(newCookie, email, password) {
 
 
 
-module.exports = { addUserToFirestore, updateCookie, getAllUsers }
+module.exports = { addUserToFirestore, updateCookie, getAllUsers, updateQuestionCnt }

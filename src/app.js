@@ -15,8 +15,8 @@ main()
 
 function main() {
     // runSchedular()
-    enableWebPageRoutes();
-    // executeScript()
+    // enableWebPageRoutes();
+    executeScript()
 }
 
 
@@ -78,7 +78,7 @@ async function executeScript() {
 
     const completeCode = codeMerger.mergeCode(solutionCode, driverCode);
 
-    const allUsers = await dbService.getAllUsers();
+    const allUsers = await dbService.getAllUsers(qid);
 
     allUsers.forEach(async (user) => {
         console.log("USER LOGING : ", user)
@@ -94,6 +94,7 @@ async function submitCodeAndNotify(solutionCode, completeCode, qid, user) {
         const { result, response } = await codeSubmitter.submit(solutionCode, completeCode, qid, user.cookie);
         console.log("sending mail to ", user.name, " ", user.email)
         // console.log("email body : ", response);
+        dbService.updateQuestionCnt(user.email, qid)
         await mailSender.sendMail(user.email, response);
     } catch (error) {
         console.log(error)
