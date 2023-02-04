@@ -15,8 +15,8 @@ main()
 
 function main() {
     // runSchedular()
-    // enableWebPageRoutes();
-    executeScript()
+    enableWebPageRoutes();
+    // executeScript()
 }
 
 
