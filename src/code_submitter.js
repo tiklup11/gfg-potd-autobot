@@ -107,14 +107,14 @@ async function submitSolutionAndTryGettingValidStatus(subid, userCookie) {
     var response = {}
     while (tryingCount < maxTryCount) {
 
-        await waitForSeconds(10)
+        await waitForSeconds(15)
 
         // console.log(`trying count : ${tryingCount}`)
         const res = await getSubmittionResult(subid, userCookie)
         response = res
 
         if (res.status === "QUEUED") {
-            console.log("trying again in 10 seconds")
+            console.log("trying again in 15 seconds..")
         } else {
             return formatMessage(response);
         }

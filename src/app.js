@@ -16,8 +16,8 @@ main()
 
 function main() {
     // runSchedular()
-    enableWebPageRoutes();
-    // executeScript()
+    // enableWebPageRoutes();
+    executeScript()
 }
 
 //webpage routes
@@ -86,7 +86,13 @@ async function executeScript() {
         console.log("doing submittion for ", user.name)
         await submitCodeAndNotify(solutionCode, completeCode, qid, user);
         console.log("submitted.")
+        console.log("waiting for 10 seconds, before moving to next user")
+        await waitForSeconds(10)
     })
+}
+
+async function waitForSeconds(seconds) {
+    return await new Promise(resolve => setTimeout(resolve, seconds * 1000));
 }
 
 //TODO : add username to mail
