@@ -67,7 +67,7 @@ async function updateQuestionCnt(email, qid) {
 }
 
 
-
+//update cookie if expired, needed email and password
 async function updateCookie(newCookie, email, password) {
     // check if user exists
     let userRef = db.collection('users').where('email', '==', email);
