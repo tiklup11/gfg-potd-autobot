@@ -1,27 +1,24 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <link rel="stylesheet" type="text/css" href="/styles.css">
+  <head>
+    <link rel="stylesheet" type="text/css" href="/styles.css" />
     <title>Update Cookie</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="form-container">
-        <form action="http://localhost:8080/update_cookie" method="post">
+      <form action="/update_cookie" method="post">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" /><br />
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email"><br>
+        <label for="cookie">New Cookie:</label>
+        <textarea id="cookie" name="cookie" rows="4" cols="50"></textarea><br />
 
-            <label for="cookie">New Cookie:</label>
-            <textarea id="cookie" name="cookie" rows="4" cols="50"></textarea><br>
+        <label for="userpass">User Pass:</label>
+        <input type="password" id="userpass" name="userpass" /><br />
 
-            <label for="userpass">User Pass:</label>
-            <input type="password" id="userpass" name="userpass"><br>
-
-            <input type="submit" value="Update Cookie">
-        </form>
+        <input type="submit" value="Update Cookie" />
+      </form>
     </div>
-</body>
-
+  </body>
 </html>
