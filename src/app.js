@@ -25,15 +25,15 @@ function enableWebPageRoutes() {
     app.use('/', router);
     app.use('/users', router)
 
-    app.get('/run', (req, res) => {
-        res.send("running, you will get the mail")
-        executeScript()
-    })
+    // app.get('/run', (req, res) => {
+    //     res.send("running, you will get the mail")
+    //     executeScript()
+    // })
 
-    app.get('/test', (req, res) => {
-        res.send("checking, sending you a alive mail")
-        sendAliveMail()
-    })
+    // app.get('/test', (req, res) => {
+    //     res.send("checking, sending you a alive mail")
+    //     sendAliveMail()
+    // })
 
     const port = process.env.PORT || 1289
     app.listen(port, () => {
