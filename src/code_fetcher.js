@@ -68,7 +68,7 @@ async function test() {
     // const merged = merger.mergeCode(mycode, code)
     // console.log(merged)
 }
-test()
+// test()
 
 
 module.exports = {
