@@ -58,10 +58,7 @@ function runSchedular() {
 }
 
 function sendAliveMail() {
-  mailSender.sendMail(
-    "tiklup1729@gmail.com",
-    "Hello BOSS, don't worry, I am alive and will do the POTD after one hour"
-  );
+  mailSender.sendMail("tiklup1729@gmail.com", "Test", "201");
 }
 
 //operations
@@ -88,7 +85,7 @@ async function executeScript() {
     await submitCodeAndNotify(solutionCode, completeCode, qid, user);
     console.log("submitted.");
     console.log("waiting for 10 seconds, before moving to next user");
-    await waitForSeconds(10);
+    await waitForSeconds(6);
   });
 }
 
@@ -108,7 +105,7 @@ async function submitCodeAndNotify(solutionCode, completeCode, qid, user) {
     console.log("sending mail to ", user.name, " ", user.email);
     // console.log("email body : ", response);
     dbService.updateQuestionCnt(user.email, qid);
-    await mailSender.sendMail(user.email, response);
+    await mailSender.sendMail(user.email, response, user.solved_ques_count);
   } catch (error) {
     console.log(error);
   }
