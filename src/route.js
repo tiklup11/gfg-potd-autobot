@@ -24,33 +24,26 @@ router.get("/styles.css", (req, res) => {
 });
 
 router.post("/adduser", async (req, res) => {
-  var { name, email, cookie, userpass } = req.body;
+  var { name, email, headerstring, userpass } = req.body;
 
-  if (checkValidations(name, email, cookie, userpass) === false) {
+  if (doValidations(name, email, headerstring, userpass) === false) {
     return res.send("All fields are required");
   }
 
-  if (isJson(cookie) === false) {
-    return res.send(
-      "Cookie must be in JSON format, use Cookie-editor extension to get cookies"
-    );
-  }
-
-  cookie = formatter.formatCookie(JSON.parse(cookie));
   await db_service.addUserToFirestore({
     name: name,
     email: email,
-    cookie: cookie,
+    cookie: headerstring,
     userpass: userpass,
   });
   return res.send("User added");
 });
 
-function checkValidations(name, email, cookie, userpass) {
+function doValidations(name, email, headerstring, userpass) {
   if (
     name.trim() === "" ||
     email.trim() === "" ||
-    cookie.trim() === "" ||
+    headerstring.trim() === "" ||
     userpass.trim() === ""
   ) {
     return false;
@@ -61,21 +54,7 @@ function checkValidations(name, email, cookie, userpass) {
 router.post("/update_cookie", async (req, res) => {
   var { email, cookie, userpass } = req.body;
 
-  if (isJson(cookie) === false) {
-    return res.send(
-      "Cookie must be in JSON format, use Cookie-editor extension to get cookies"
-    );
-  }
   return res.send(await db_service.updateCookie(cookie, email, userpass));
 });
-
-function isJson(str) {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
-}
 
 module.exports = router;
