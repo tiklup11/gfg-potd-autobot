@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const url_fetcher = require("../url_fetcher");
 const html_generator = require("../html_generator");
+const fs = require("fs");
 
 let date = new Date();
 date = date.toLocaleDateString();
@@ -32,7 +33,7 @@ async function sendMail(to, message, solvedProblemCnt) {
       "Some error occured on submiting your POTD for today, Please update your cookies or LOSE your freebies.";
   }
   mailOptions.to = to;
-  mailOptions.html = makeHTML_Body(solvedProblemCnt);
+  mailOptions.html = await makeHTML_Body(solvedProblemCnt);
   return new Promise((resolve, reject) => {
     try {
       transporter.sendMail(mailOptions, (error, info) => {
@@ -57,8 +58,10 @@ async function makeHTML_Body(solvedProblemCnt) {
   let date = new Date();
   date = date.toLocaleDateString();
 
-  // console.log("q-url => ", qUrl)
-  return html_generator.GetFilledHtml(data, solvedProblemCnt);
+  const templatePath = "src/const/template.html";
+  const templateContent = await fs.promises.readFile(templatePath, "utf-8");
+
+  return html_generator.GetFilledHtml(date, solvedProblemCnt, templateContent);
 }
 
 module.exports = { sendMail };
