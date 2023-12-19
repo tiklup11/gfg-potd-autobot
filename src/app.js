@@ -56,7 +56,7 @@ function runSchedular() {
     executeScript();
   });
 }
-sendAliveMail();
+// sendAliveMail();
 
 function sendAliveMail() {
   mailSender.sendMail("tiklup1729@gmail.com", "Test", "201");
