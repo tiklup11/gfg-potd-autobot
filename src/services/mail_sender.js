@@ -32,7 +32,7 @@ async function sendMail(to, message, solvedProblemCnt) {
       "Some error occured on submiting your POTD for today, Please update your cookies or LOSE your freebies.";
   }
   mailOptions.to = to;
-  mailOptions.html = await makeHTML_Body(solvedProblemCnt);
+  mailOptions.html = makeHTML_Body(solvedProblemCnt);
   return new Promise((resolve, reject) => {
     try {
       transporter.sendMail(mailOptions, (error, info) => {
