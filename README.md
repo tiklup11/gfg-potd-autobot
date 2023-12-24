@@ -9,7 +9,7 @@ gfg-potd-autobot
 <img width="669" alt="image" src="https://github.com/tiklup11/gfg-potd-autobot/assets/57872422/8c350cae-a805-49be-a3f2-8a3857fb9d7b">
 
 2. Visit https://practice.geeksforgeeks.org/ & login
-3. Open cookie-editor from practice.geeksforgeeks.org website
+3. Open cookie-editor when you are on practice.geeksforgeeks.org website
 
 <img width="504" alt="image" src="https://github.com/tiklup11/gfg-potd-autobot/assets/57872422/7e9cfa7f-97e2-4b49-be38-ca2024634f63">
 
