@@ -4,7 +4,7 @@ gfg-potd-autobot
 
 ## Easy Setup
 
-1. Install cookie-editor
+1. Install cookie-editor extention for your browser
 
 <img width="669" alt="image" src="https://github.com/tiklup11/gfg-potd-autobot/assets/57872422/8c350cae-a805-49be-a3f2-8a3857fb9d7b">
 
