@@ -2,9 +2,9 @@
 2. compile solution
     - get pre code (boiler plate)
     - get complete solution
-    - combine then 
+    - combine them
 3. fetch user-list
-    - check if question is already done for that day
+    - check if question is already done for that day for that user
     - if yes : skip
     - else:
 4. send a post to submit, when you make a submission to gfg, you will get a submittion id, after an interval[5-10sec] using that id you check for submittion status for that question [passed/failed/in-queue/running]
@@ -17,3 +17,10 @@
     - if passedd
     - update db
     - send mail
+
+
+HOW IT IS AUTOMATED TO RUN EVERYDAY:
+
+General Solution: CronJob: but no free service avaiable to handle cron job.
+
+Current Solution: Using a service which checks server status by pinging to a specific endpoint: in our case it is https://uptimerobot.com/, if pings /run at a interval of 1hr daily, and the script to solve question runs.
