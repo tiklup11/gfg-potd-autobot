@@ -18,5 +18,6 @@ gfg-potd-autobot
 <img width="494" alt="image" src="https://github.com/tiklup11/gfg-potd-autobot/assets/57872422/1c4c9e59-5676-41ba-8a01-0c75f438aa2b">
 
 5. Go to https://gfg-potd-bot.onrender.com/ & paste the header-string & fill other fields.
+6. After subscribing if you want to test and solve the current day problem, go to https://practice.geeksforgeeks.org/run
 
 
