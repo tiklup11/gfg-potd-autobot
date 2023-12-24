@@ -1,17 +1,19 @@
-/**
-upon making a post request to this endpoint : /api/latest/problems/submission/result/ 
-
-correct : sub_status : 1
-incorrect : sub_status : 0
-othre sub_status codes for each type of errors
-
-
-/**
-1. get potd URL
+1. get current day potd ID
 2. compile solution
-    - get pre code
+    - get pre code (boiler plate)
     - get complete solution
-3. send a post to submit
+    - combine then 
+3. fetch user-list
+    - check if question is already done for that day
+    - if yes : skip
+    - else:
+4. send a post to submit, when you make a submission to gfg, you will get a submittion id, after an interval[5-10sec] using that id you check for submittion status for that question [passed/failed/in-queue/running]
     - get submittion id
     - make submittion
-4. confirmation
+    - if submittion failed: meaning cookie expired
+    - notify user about cookie expire
+    - else:
+5. check status
+    - if passedd
+    - update db
+    - send mail
