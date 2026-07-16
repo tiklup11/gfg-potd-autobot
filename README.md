@@ -1,26 +1,111 @@
-# gfg-potd-autobot
+# GFG POTD Autobot
 
-want an overview of code -> go to documentation.txt
+Runs the GeeksforGeeks problem of the day for users configured in a protected
+JSON file and emails one result summary after each run.
 
-gfg-potd-autobot
-![Futuristic Modern Black and White Logo (1)](https://user-images.githubusercontent.com/57872422/223865009-590e56c4-c48c-449f-ad9e-dd6e57cbb568.png)
+The default schedule is `0 15 * * *` in `Asia/Kolkata`, which is 3:00 PM IST.
+Change `CRON_SCHEDULE` or `CRON_TIMEZONE` in the VPS environment file when
+needed.
 
-## Easy Setup
+## Add or update users
 
-1. Install cookie-editor extention for your browser
+Cookie-Editor must be set to JSON export mode. Its exported file should contain
+an array of `.geeksforgeeks.org` cookies like the structure shown by
+`config/users.example.json`.
 
-<img width="669" alt="image" src="https://github.com/tiklup11/gfg-potd-autobot/assets/57872422/8c350cae-a805-49be-a3f2-8a3857fb9d7b">
+From the repository, add a user with:
 
-2. Visit https://practice.geeksforgeeks.org/ & login
-3. Open cookie-editor when you are on [gfg practice webpage](https://practice.geeksforgeeks.org/) website
+```bash
+npm run user:upsert -- \
+  --email user@example.com \
+  --cookies /path/to/cookie-editor-export.json
+```
 
-<img width="504" alt="image" src="https://github.com/tiklup11/gfg-potd-autobot/assets/57872422/7e9cfa7f-97e2-4b49-be38-ca2024634f63">
+The command creates `config/users.json` when it does not exist. The resulting
+file has this shape:
 
-4. Click on Export > Header String, this will copy it your clipboard
+```json
+[
+  {
+    "email": "user@example.com",
+    "authHeader": "cookie-name=cookie-value; another-cookie=another-value"
+  }
+]
+```
 
-<img width="494" alt="image" src="https://github.com/tiklup11/gfg-potd-autobot/assets/57872422/1c4c9e59-5676-41ba-8a01-0c75f438aa2b">
+To refresh an existing user's cookies, export the latest cookies and run the
+same command with the same email:
 
-5. Go to https://gfg-potd-bot.onrender.com/ & paste the header-string & fill other fields.
-6. After subscribing if you want to test and solve the current day problem, go to https://practice.geeksforgeeks.org/run
+```bash
+npm run user:upsert -- \
+  --email user@example.com \
+  --cookies /path/to/new-cookie-editor-export.json
+```
 
+Emails are matched case-insensitively, so an existing entry is replaced instead
+of duplicated. Run the command once for each user, then upload the completed
+file to the VPS:
 
+```bash
+ssh -t -i ~/.ssh/orcle_vps_ai_key ubuntu@140.245.25.32 \
+  'sudo install -d -o ubuntu -g ubuntu -m 700 /srv/gfg-potd-bot/config'
+
+scp -i ~/.ssh/orcle_vps_ai_key \
+  config/users.json \
+  ubuntu@140.245.25.32:/srv/gfg-potd-bot/config/users.json
+
+ssh -i ~/.ssh/orcle_vps_ai_key ubuntu@140.245.25.32 \
+  'chmod 600 /srv/gfg-potd-bot/config/users.json'
+```
+
+`config/users.json` is the bot's small user database and is tracked in this
+personal private repository. It contains active login credentials, so the
+repository must never be made public or shared. The script rejects expired and
+non-GFG cookies, writes the file atomically with mode `600`, and never prints
+authentication values.
+
+The account used to fetch the official solution is configured separately, so
+submission users remain eligible for their own reward points:
+
+```bash
+npm run solution:set -- --cookies /path/to/solution-account-export.json
+```
+
+This writes the tracked `config/solution-user.json` file. Copy both protected
+files to the VPS before deployment:
+
+```bash
+scp -i ~/.ssh/orcle_vps_ai_key \
+  config/users.json config/solution-user.json \
+  ubuntu@140.245.25.32:/srv/gfg-potd-bot/config/
+
+ssh -i ~/.ssh/orcle_vps_ai_key ubuntu@140.245.25.32 \
+  'chmod 600 /srv/gfg-potd-bot/config/users.json /srv/gfg-potd-bot/config/solution-user.json'
+```
+
+To test one configured user immediately without sending the report email:
+
+```bash
+npm run run:once -- user@example.com --no-email
+```
+
+Remove `--no-email` to send the normal summary report after the test. The
+command exits with status `0` on success and `1` on failure.
+
+## VPS deployment
+
+GitHub Actions builds an ARM64 image and automatically deploys pushes to `main`
+through `infra_repo/scripts/deploy-app.sh`. Runtime configuration stays on the
+VPS at `<VPS_APP_PATH>/envs/.env.prod`; use `envs/.env.prod.example` as its
+template.
+
+The GitHub `prod` environment requires these variables:
+
+- `VPS_HOST`
+- `VPS_PORT`
+- `VPS_USER`
+- `VPS_APP_PATH`
+- `VPS_INFRA_PATH`
+
+It also requires `VPS_SSH_PRIVATE_KEY` and `VPS_KNOWN_HOSTS` as secrets. The
+VPS must already be logged in to GHCR and have the latest `infra_repo` checkout.

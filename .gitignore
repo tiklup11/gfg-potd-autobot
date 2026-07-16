@@ -1,2 +1,5 @@
 node_modules
-package-lock.json
+.env
+envs/.env.prod
+src/services/serviceApiKey.json
+src/const/*_cookie.js
