@@ -7,7 +7,7 @@ const urlFetcher = require("./url_fetcher");
 const mailSender = require("./services/mail_sender");
 const { loadUsers, loadSolutionAuthHeader } = require("./users");
 
-const schedule = process.env.CRON_SCHEDULE || "0 15 * * *";
+const schedule = process.env.CRON_SCHEDULE || "0 15,18,21,23 * * *";
 const timezone = process.env.CRON_TIMEZONE || "Asia/Kolkata";
 const port = Number(process.env.PORT || 1289);
 let jobRunning = false;

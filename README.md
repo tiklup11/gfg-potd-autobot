@@ -3,9 +3,9 @@
 Runs the GeeksforGeeks problem of the day for users configured in a protected
 JSON file and emails one result summary after each run.
 
-The default schedule is `0 15 * * *` in `Asia/Kolkata`, which is 3:00 PM IST.
-Change `CRON_SCHEDULE` or `CRON_TIMEZONE` in the VPS environment file when
-needed.
+The default schedule is `0 15,18,21,23 * * *` in `Asia/Kolkata`, which runs at
+3:00 PM, 6:00 PM, 9:00 PM, and 11:00 PM IST every day. Change `CRON_SCHEDULE`
+or `CRON_TIMEZONE` in the VPS environment file when needed.
 
 ## Add or update users
 
