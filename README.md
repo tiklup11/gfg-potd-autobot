@@ -43,20 +43,8 @@ npm run user:upsert -- \
 ```
 
 Emails are matched case-insensitively, so an existing entry is replaced instead
-of duplicated. Run the command once for each user, then upload the completed
-file to the VPS:
-
-```bash
-ssh -t -i ~/.ssh/orcle_vps_ai_key ubuntu@140.245.25.32 \
-  'sudo install -d -o ubuntu -g ubuntu -m 700 /srv/gfg-potd-bot/config'
-
-scp -i ~/.ssh/orcle_vps_ai_key \
-  config/users.json \
-  ubuntu@140.245.25.32:/srv/gfg-potd-bot/config/users.json
-
-ssh -i ~/.ssh/orcle_vps_ai_key ubuntu@140.245.25.32 \
-  'chmod 600 /srv/gfg-potd-bot/config/users.json'
-```
+of duplicated. Run the command once for each user, then commit and push the
+updated file to `main`. GitHub Actions deploys it to the VPS automatically.
 
 `config/users.json` is the bot's small user database and is tracked in this
 personal private repository. It contains active login credentials, so the
@@ -71,17 +59,9 @@ submission users remain eligible for their own reward points:
 npm run solution:set -- --cookies /path/to/solution-account-export.json
 ```
 
-This writes the tracked `config/solution-user.json` file. Copy both protected
-files to the VPS before deployment:
-
-```bash
-scp -i ~/.ssh/orcle_vps_ai_key \
-  config/users.json config/solution-user.json \
-  ubuntu@140.245.25.32:/srv/gfg-potd-bot/config/
-
-ssh -i ~/.ssh/orcle_vps_ai_key ubuntu@140.245.25.32 \
-  'chmod 600 /srv/gfg-potd-bot/config/users.json /srv/gfg-potd-bot/config/solution-user.json'
-```
+This writes the tracked `config/solution-user.json` file. GitHub Actions deploys
+both JSON files to `<VPS_APP_PATH>/config` with mode `600` before restarting the
+bot container.
 
 To test one configured user immediately without sending the report email:
 

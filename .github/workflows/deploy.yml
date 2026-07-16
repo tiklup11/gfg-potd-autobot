@@ -49,6 +49,9 @@ jobs:
       - name: Check JavaScript syntax
         run: npm run check
 
+      - name: Validate credential database
+        run: node -e 'const users = require("./src/users"); users.loadUsers(); users.loadSolutionAuthHeader();'
+
       - name: Validate deployment configuration
         env:
           VPS_HOST: ${{ vars.VPS_HOST }}
@@ -148,6 +151,8 @@ jobs:
           scp -o StrictHostKeyChecking=yes -i ~/.ssh/deploy_key -P "$port" \
             docker-compose.base.yml \
             docker-compose.prod.yml \
+            config/users.json \
+            config/solution-user.json \
             "${VPS_USER}@${VPS_HOST}:${VPS_APP_PATH}/.github-deployments/${release_id}/"
 
           ssh -o StrictHostKeyChecking=yes -i ~/.ssh/deploy_key -p "$port" "${VPS_USER}@${VPS_HOST}" \
@@ -164,6 +169,11 @@ jobs:
             echo "Central deploy script is missing or not executable: $deploy_script" >&2
             exit 1
           fi
+
+          install -d -m 700 "$app_path/config"
+          install -m 600 "$release_dir/users.json" "$app_path/config/users.json"
+          install -m 600 "$release_dir/solution-user.json" "$app_path/config/solution-user.json"
+
           CI_DEPLOY_APPROVED=true "$deploy_script" \
             --workdir "$release_dir" \
             gfg-potd-bot prod rollout-image "$image"
