@@ -1,84 +1,53 @@
 const request = require("request");
+const { hostName } = require("./const/constants");
 
-const constants = require("./const/constants");
+async function fetchStarterCode(qid, authHeader) {
+  const body = await fetchJson(
+    `${hostName}/api/latest/problems/${qid}/metainfo/`,
+    authHeader,
+  );
+  const starterCode =
+    body?.results?.extra?.initial_user_func?.cpp?.initial_code;
+  const problemId = body?.results?.id;
 
-const merger = require("./code_merger");
+  if (!starterCode || !problemId) {
+    throw new Error("GFG metadata did not contain C++ starter code and pid");
+  }
 
-var options = {
-  url: "",
-  json: true,
-  headers: {
-    Cookie: constants.solution_Cookie,
-  },
-};
+  return { starterCode, problemId };
+}
 
-function fetchStarterCode(qid) {
-  const metaInfoUrl =
-    constants.hostName + "/api/latest/problems/" + qid + "/metainfo/";
-  options.url = metaInfoUrl;
+async function fetchSolutionCode(qid, authHeader) {
+  const body = await fetchJson(
+    `${hostName}/api/latest/problems/${qid}/hints/solution/`,
+    authHeader,
+  );
+  const solution = body?.results?.hints?.[0]?.full_func;
+  if (!solution) {
+    throw new Error("GFG response did not contain a C++ solution");
+  }
+  return solution;
+}
 
+function fetchJson(url, authHeader) {
   return new Promise((resolve, reject) => {
-    request.get(options, (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        console.log(
-          "-------------starter------------------------------------------------------"
-        );
-        // console.log(body['results']['extra']['initial_user_func']['cpp']['initial_code'])
-        // console.log("-------------------------------------------------------------------")
-        console.log(body);
-        resolve(
-          body["results"]["extra"]["initial_user_func"]["cpp"]["initial_code"]
-        );
-      } else {
-        reject(error);
-      }
-    });
+    request.get(
+      {
+        url,
+        json: true,
+        headers: { Cookie: authHeader },
+      },
+      (error, response, body) => {
+        if (error) return reject(error);
+        if (response.statusCode !== 200) {
+          return reject(
+            new Error(`GFG fetch returned HTTP ${response.statusCode}`),
+          );
+        }
+        return resolve(body);
+      },
+    );
   });
 }
 
-//e9e2da3de3eb35679ca7e17b752ae877635f1a26
-// fetchStarterCode("1646a9b5169d7571cf672f2a31533af083d1f479")
-
-function fetchSolutionCode(qid) {
-  const solutionUrl =
-    constants.hostName + "/api/latest/problems/" + qid + "/hints/solution/";
-  options.url = solutionUrl;
-
-  return new Promise((resolve, reject) => {
-    request.get(options, (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        const results = body["results"];
-        //array of objects
-        const hints = results["hints"];
-        //first object of hints maps to cpp
-        const cppCode = hints[0]["full_func"];
-        // console.log(cppCode)
-        resolve(cppCode);
-      } else {
-        reject(error);
-      }
-    });
-  });
-}
-
-////Position this line where user code will be pasted.
-async function test() {
-  const code = await fetchStarterCode(
-    "1646a9b5169d7571cf672f2a31533af083d1f479"
-  );
-  const mycode = await fetchSolutionCode(
-    "1646a9b5169d7571cf672f2a31533af083d1f479"
-  );
-  // console.log("------------------code-----------------------")
-  // console.log(code)
-  // console.log("------------------mycode---------------------")
-  // console.log(mycode)
-  // const merged = merger.mergeCode(mycode, code)
-  // console.log(merged)
-}
-// test()
-
-module.exports = {
-  fetchStarterCode,
-  fetchSolutionCode,
-};
+module.exports = { fetchStarterCode, fetchSolutionCode };

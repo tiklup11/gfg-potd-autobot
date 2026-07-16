@@ -1,0 +1,9 @@
+*
+!package.json
+!package-lock.json
+!src/
+!src/**
+!Dockerfile
+src/services/serviceApiKey.json
+src/const/*_cookie.js
+src/logo.png

@@ -1,0 +1,36 @@
+services:
+  bot:
+    image: ${GFG_POTD_BOT_IMAGE:-gfg-potd-bot:latest}
+    build:
+      context: .
+    env_file:
+      - path: ${ENV_FILE:-envs/.env.prod}
+        required: true
+    environment:
+      USERS_FILE: /config/users.json
+      SOLUTION_USER_FILE: /config/solution-user.json
+    volumes:
+      - type: bind
+        source: ${USERS_FILE_PATH:?USERS_FILE_PATH is required}
+        target: /config/users.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${SOLUTION_USER_FILE_PATH:?SOLUTION_USER_FILE_PATH is required}
+        target: /config/solution-user.json
+        read_only: true
+        bind:
+          create_host_path: false
+    init: true
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:1289/healthz",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped

@@ -1,151 +1,150 @@
-const constants = require('./const/constants')
+const request = require("request");
+const { hostName } = require("./const/constants");
 
-const request = require('request');
+const pollingIntervalSeconds = 15;
+const maxPollingAttempts = 10;
 
-const hostName = 'https://practiceapiorigin.geeksforgeeks.org';
-
-const formData = {
-    'source': 'https://practice.geeksforgeeks.org',
-    'request_type': 'solutionCheck',
-    'userCode': '',
-    'code': '',
-    'language': 'cpp'
-};
-
-const options = {
-    url: '',
-    method: 'POST',
-    formData: formData,
-    headers: {
-        Cookie: '',
-        'Sec-Ch-Ua': '(Not(A:Brand";v="8", "Chromium";v="101"',
-        'Sec-Ch-Ua-Mobile': '?0'
+function submitCode(userCode, code, qid, userCookie) {
+  return postMultipart(
+    `${hostName}/api/latest/problems/${qid}/compile/`,
+    {
+      source: "https://practice.geeksforgeeks.org",
+      request_type: "solutionCheck",
+      userCode,
+      code,
+      language: "cpp",
+    },
+    userCookie,
+    "submission",
+  ).then((body) => {
+    const submissionId = body?.results?.submission_id;
+    if (!submissionId) {
+      throw new Error(
+        `GFG submission response did not contain submission_id: ${safeResponse(body)}`,
+      );
     }
-};
-
-function getSubmittionId(userCode, code, qid, userCookie) {
-
-    initOptionsAndHeader(qid, code, userCode, userCookie);
-
-    return new Promise((resolve, reject) => {
-        request(options, (error, response, body) => {
-            if (!error && response.statusCode === 200) {
-                const jsonbody = JSON.parse(body);
-                resolve(jsonbody.results.submission_id)
-            } else {
-                reject(error)
-            }
-        });
-    })
+    return submissionId;
+  });
 }
 
-function initOptionsAndHeader(qid, code, userCode, userCookie) {
-    const endpoint = hostName + "/api/latest/problems/" + qid + "/compile/";
-    options.url = endpoint;
+function fetchSubmissionResult(submissionId, problemId, userCookie) {
+  return postMultipart(
+    `${hostName}/api/latest/problems/submission/submit/result/?`,
+    {
+      sub_id: submissionId,
+      sub_type: "solutionCheck",
+      pid: String(problemId),
+    },
+    userCookie,
+    "result",
+  );
+}
 
-    formData.code = code;
-    formData.userCode = userCode;
-    options.formData = formData;
-    options.headers = {
-        'Cookie': userCookie,
-        'Sec-Ch-Ua': '(Not(A:Brand";v="8", "Chromium";v="101"',
-        'Sec-Ch-Ua-Mobile': '?0'
+async function submit(userCode, code, qid, problemId, userCookie) {
+  try {
+    const submissionId = await submitCode(userCode, code, qid, userCookie);
+    return await pollSubmissionResult(submissionId, problemId, userCookie);
+  } catch (error) {
+    return { result: false, response: error };
+  }
+}
+
+async function pollSubmissionResult(submissionId, problemId, userCookie) {
+  let lastResponse;
+
+  for (let attempt = 0; attempt < maxPollingAttempts; attempt += 1) {
+    await waitForSeconds(pollingIntervalSeconds);
+    lastResponse = await fetchSubmissionResult(
+      submissionId,
+      problemId,
+      userCookie,
+    );
+
+    if (String(lastResponse?.status).toUpperCase() === "QUEUED") {
+      console.log(
+        `Submission queued; checking again in ${pollingIntervalSeconds} seconds`,
+      );
+      continue;
     }
+
+    return formatResult(lastResponse);
+  }
+
+  return {
+    result: false,
+    response: `GFG result was still queued after ${maxPollingAttempts} checks: ${safeResponse(lastResponse)}`,
+  };
 }
 
-function getSubmittionResult(submissionId, userCookie) {
+function formatResult(response) {
+  if (
+    Number(response?.sub_status) === 1 ||
+    (response?.status === "calculated" && response?.message === null)
+  ) {
+    return { result: true, response: "Solved successfully" };
+  }
 
-    initHeadersAndFormData(submissionId, userCookie);
-
-    return new Promise((resolve, reject) => {
-        request(options, (error, response, body) => {
-            if (!error && response.statusCode === 200) {
-                const jsonbody = JSON.parse(body)
-                console.log(jsonbody)
-                resolve(jsonbody)
-            } else {
-                reject(error)
-            }
-        });
-    })
-}
-
-function initHeadersAndFormData(submissionId, userCookie) {
-    const endpoint = hostName + "/api/latest/problems/submission/result/ ";
-    options.url = endpoint;
-
-    const formData = {
-        'sub_id': submissionId,
-        'sub_type': 'solutionCheck',
+  const expected = response?.message?.file_output;
+  const received = response?.message?.code_output;
+  if (expected !== undefined || received !== undefined) {
+    return {
+      result: false,
+      response: `Wrong answer (expected: ${expected ?? "unknown"}, received: ${received ?? "unknown"})`,
     };
-    options.formData = formData;
-    options.headers = {
-        'Cookie': userCookie,
-        'Sec-Ch-Ua': '(Not(A:Brand";v="8", "Chromium";v="101"',
-        'Sec-Ch-Ua-Mobile': '?0'
-    }
+  }
 
-
+  return {
+    result: false,
+    response: `GFG returned ${response?.view_mode || response?.status || "an unknown result"}: ${safeResponse(response)}`,
+  };
 }
 
-async function submit(mycode, code, qid, userCookie) {
-    var res = {};
-    try {
-        const subid = await getSubmittionId(mycode, code, qid, userCookie);
-        res = await submitSolutionAndTryGettingValidStatus(subid, userCookie)
-    } catch (error) {
-        res = { result: false, response: error }
-    }
-    return res;
-}
-
-
-async function submitSolutionAndTryGettingValidStatus(subid, userCookie) {
-    var tryingCount = 0;
-    var maxTryCount = 10;
-
-    var response = {}
-    while (tryingCount < maxTryCount) {
-
-        await waitForSeconds(15)
-
-        // console.log(`trying count : ${tryingCount}`)
-        const res = await getSubmittionResult(subid, userCookie)
-        response = res
-
-        if (res.status === "QUEUED") {
-            console.log("trying again in 15 seconds..")
-        } else {
-            return formatMessage(response);
+function postMultipart(url, formData, userCookie, operation) {
+  return new Promise((resolve, reject) => {
+    request(
+      {
+        url,
+        method: "POST",
+        formData,
+        headers: {
+          Accept: "*/*",
+          Cookie: userCookie,
+          Origin: "https://www.geeksforgeeks.org",
+          Referer: "https://www.geeksforgeeks.org/",
+        },
+      },
+      (error, response, body) => {
+        if (error) return reject(error);
+        if (response.statusCode !== 200) {
+          return reject(
+            new Error(
+              `GFG ${operation} returned HTTP ${response.statusCode}: ${safeResponse(body)}`,
+            ),
+          );
         }
-        tryingCount++;
-    }
-    response = JSON.stringify(response, null, 2)
 
-    return { result: false, response: response }
+        try {
+          return resolve(JSON.parse(body));
+        } catch (parseError) {
+          return reject(
+            new Error(
+              `GFG ${operation} returned invalid JSON: ${safeResponse(body)}`,
+              { cause: parseError },
+            ),
+          );
+        }
+      },
+    );
+  });
 }
 
-
-function formatMessage(response) {
-    var message = response;
-
-    if (message === null) {
-        message = "Solved successfully";
-    } else {
-        message = JSON.stringify(message, 2);
-    }
-
-    return { result: true, response: message };
+function safeResponse(value) {
+  const message = typeof value === "string" ? value : JSON.stringify(value);
+  return (message || "empty response").replace(/\s+/g, " ").slice(0, 500);
 }
 
-async function waitForSeconds(seconds) {
-    return await new Promise(resolve => setTimeout(resolve, seconds * 1000));
+function waitForSeconds(seconds) {
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 }
 
-
-module.exports = { submit }
-
-// main()
-
-// getSubmittionId("//this is my code", "6eb51dc638ee1b936f38d1ab4b2f7062d4425463")
-
+module.exports = { submit };
