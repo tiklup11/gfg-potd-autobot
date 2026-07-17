@@ -136,6 +136,8 @@ jobs:
           SMTP_USER: ${{ vars.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           REPORT_EMAIL: ${{ vars.REPORT_EMAIL }}
+          NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
+          NEW_RELIC_APP_NAME: ${{ vars.NEW_RELIC_APP_NAME }}
           PORT: ${{ vars.PORT }}
           CRON_SCHEDULE: ${{ vars.CRON_SCHEDULE }}
           CRON_TIMEZONE: ${{ vars.CRON_TIMEZONE }}
@@ -169,6 +171,8 @@ jobs:
             printf 'export SMTP_USER=%q\n' "$SMTP_USER"
             printf 'export SMTP_PASSWORD=%q\n' "$SMTP_PASSWORD"
             printf 'export REPORT_EMAIL=%q\n' "$REPORT_EMAIL"
+            printf 'export NEW_RELIC_LICENSE_KEY=%q\n' "$NEW_RELIC_LICENSE_KEY"
+            printf 'export NEW_RELIC_APP_NAME=%q\n' "$NEW_RELIC_APP_NAME"
             printf 'export PORT=%q\n' "$PORT"
             printf 'export CRON_SCHEDULE=%q\n' "$CRON_SCHEDULE"
             printf 'export CRON_TIMEZONE=%q\n' "$CRON_TIMEZONE"

@@ -1,4 +1,5 @@
 node_modules
+newrelic_agent.log
 .env
 src/services/serviceApiKey.json
 src/const/*_cookie.js

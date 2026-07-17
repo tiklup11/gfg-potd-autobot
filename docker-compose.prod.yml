@@ -2,3 +2,5 @@ services:
   bot:
     environment:
       NODE_ENV: production
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY:-}
+      NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME:-gfg-potd-bot}

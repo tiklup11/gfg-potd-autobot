@@ -1,3 +1,4 @@
+const observability = require("./observability");
 const http = require("http");
 const cron = require("node-cron");
 const codeFetcher = require("./code_fetcher");
@@ -25,6 +26,7 @@ if (runOnceIndex !== -1) {
     runJob({
       targetEmail: email,
       sendEmail: !arguments.includes("--no-email"),
+      trigger: "manual",
     }).then((successful) => {
       process.exitCode = successful ? 0 : 1;
     });
@@ -38,31 +40,51 @@ function startScheduler() {
     throw new Error(`Invalid CRON_SCHEDULE: ${schedule}`);
   }
 
-  cron.schedule(schedule, () => void runJob(), { timezone });
-  console.log(`POTD job scheduled with '${schedule}' in ${timezone}`);
+  cron.schedule(schedule, () => void runJob({ trigger: "cron" }), { timezone });
+  observability.info("scheduler.started", {
+    schedule,
+    timezone,
+    newRelicEnabled: observability.newRelicEnabled,
+  });
 
-  http
-    .createServer((req, res) => {
-      if (req.url !== "/healthz") {
-        res.writeHead(404);
-        return res.end("not found");
-      }
-      res.writeHead(200, { "Content-Type": "text/plain" });
-      return res.end("ok");
-    })
-    .listen(port, () => console.log(`Health server listening on port ${port}`));
+  const healthServer = http.createServer((req, res) => {
+    if (req.url !== "/healthz") {
+      res.writeHead(404);
+      return res.end("not found");
+    }
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    return res.end("ok");
+  });
+  healthServer.on("error", (error) => {
+    observability.error("health_server.failed", error, { port });
+    process.exit(1);
+  });
+  healthServer.listen(port, () =>
+    observability.info("health_server.started", { port }),
+  );
 }
 
-async function runJob({ targetEmail, sendEmail = true } = {}) {
+async function runJob({
+  targetEmail,
+  sendEmail = true,
+  trigger = "unknown",
+} = {}) {
   if (jobRunning) {
-    console.log("Skipping POTD job because the previous run is still active");
+    observability.warn("job.skipped", { reason: "previous_run_active" });
     return;
   }
 
   jobRunning = true;
+  const startedAt = Date.now();
   let users = [];
   let qid = "unknown";
   let results = [];
+
+  observability.info("job.started", {
+    trigger,
+    targetEmail: targetEmail || "all",
+    sendEmail,
+  });
 
   try {
     users = loadUsers();
@@ -74,8 +96,10 @@ async function runJob({ targetEmail, sendEmail = true } = {}) {
         throw new Error(`User not found in users.json: ${targetEmail}`);
       }
     }
+    observability.info("job.users_loaded", { userCount: users.length });
 
     qid = await urlFetcher.fetchPOTD_QID();
+    observability.info("job.problem_loaded", { qid });
     const sourceAuthHeader = loadSolutionAuthHeader();
     const { starterCode: driverCode, problemId } =
       await codeFetcher.fetchStarterCode(
@@ -88,7 +112,13 @@ async function runJob({ targetEmail, sendEmail = true } = {}) {
     );
     const completeCode = codeMerger.mergeCode(solutionCode, driverCode);
 
-    for (const user of users) {
+    for (const [index, user] of users.entries()) {
+      observability.info("submission.started", {
+        email: user.email,
+        qid,
+        userNumber: index + 1,
+        userCount: users.length,
+      });
       results.push(
         await submitForUser(
           user,
@@ -102,7 +132,7 @@ async function runJob({ targetEmail, sendEmail = true } = {}) {
     }
   } catch (error) {
     const message = errorMessage(error);
-    console.error("POTD job failed", message);
+    observability.error("job.failed", error, { qid, trigger });
     results = users.map((user) => ({
       email: user.email,
       success: false,
@@ -113,14 +143,25 @@ async function runJob({ targetEmail, sendEmail = true } = {}) {
   printResults(qid, results);
   if (sendEmail) {
     try {
+      observability.info("report_email.started", { qid });
       await mailSender.sendReport({ qid, results });
+      observability.info("report_email.sent", { qid });
     } catch (error) {
-      console.error("Failed to send POTD report", errorMessage(error));
+      observability.error("report_email.failed", error, { qid });
     }
   }
 
   jobRunning = false;
-  return results.length > 0 && results.every((result) => result.success);
+  const successful = results.filter((result) => result.success).length;
+  const success = results.length > 0 && successful === results.length;
+  observability.info("job.completed", {
+    qid,
+    success,
+    successful,
+    failed: results.length - successful,
+    durationMs: Date.now() - startedAt,
+  });
+  return success;
 }
 
 async function submitForUser(
@@ -140,14 +181,17 @@ async function submitForUser(
     );
 
     if (!submission.result) {
-      throw new Error(errorMessage(submission.response));
+      throw new Error(submission.error || "GFG submission failed");
     }
 
-    console.log(`POTD submitted for ${user.email}`);
+    observability.info("submission.succeeded", { email: user.email, qid });
     return { email: user.email, success: true };
   } catch (error) {
     const message = errorMessage(error);
-    console.error(`POTD submission failed for ${user.email}: ${message}`);
+    observability.error("submission.failed", error, {
+      email: user.email,
+      qid,
+    });
     return { email: user.email, success: false, error: message };
   }
 }
@@ -159,11 +203,7 @@ function errorMessage(error) {
   } else if (typeof error === "string") {
     message = error;
   } else {
-    try {
-      message = JSON.stringify(error) || "Unknown error";
-    } catch {
-      message = "Unknown error";
-    }
+    message = "Unknown error";
   }
 
   return message.replace(/\s+/g, " ").trim().slice(0, 1000) || "Unknown error";
@@ -175,10 +215,10 @@ function waitForSeconds(seconds) {
 
 function printResults(qid, results) {
   const successful = results.filter((result) => result.success).length;
-  console.log(`GFG POTD ${qid}: ${successful}/${results.length} successful`);
-  for (const result of results) {
-    console.log(
-      `${result.email} : ${result.success ? "success" : result.error || "unknown error"}`,
-    );
-  }
+  observability.info("job.summary", {
+    qid,
+    successful,
+    failed: results.length - successful,
+    userCount: results.length,
+  });
 }
