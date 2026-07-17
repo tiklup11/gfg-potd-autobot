@@ -19,9 +19,7 @@ function submitCode(userCode, code, qid, userCookie) {
   ).then((body) => {
     const submissionId = body?.results?.submission_id;
     if (!submissionId) {
-      throw new Error(
-        `GFG submission response did not contain submission_id: ${safeResponse(body)}`,
-      );
+      throw new Error("GFG submission response did not contain submission_id");
     }
     return submissionId;
   });
@@ -41,38 +39,29 @@ function fetchSubmissionResult(submissionId, problemId, userCookie) {
 }
 
 async function submit(userCode, code, qid, problemId, userCookie) {
-  try {
-    const submissionId = await submitCode(userCode, code, qid, userCookie);
-    return await pollSubmissionResult(submissionId, problemId, userCookie);
-  } catch (error) {
-    return { result: false, response: error };
-  }
+  const submissionId = await submitCode(userCode, code, qid, userCookie);
+  return pollSubmissionResult(submissionId, problemId, userCookie);
 }
 
 async function pollSubmissionResult(submissionId, problemId, userCookie) {
-  let lastResponse;
-
   for (let attempt = 0; attempt < maxPollingAttempts; attempt += 1) {
     await waitForSeconds(pollingIntervalSeconds);
-    lastResponse = await fetchSubmissionResult(
+    const result = await fetchSubmissionResult(
       submissionId,
       problemId,
       userCookie,
     );
 
-    if (String(lastResponse?.status).toUpperCase() === "QUEUED") {
-      console.log(
-        `Submission queued; checking again in ${pollingIntervalSeconds} seconds`,
-      );
+    if (String(result?.status).toUpperCase() === "QUEUED") {
       continue;
     }
 
-    return formatResult(lastResponse);
+    return formatResult(result);
   }
 
   return {
     result: false,
-    response: `GFG result was still queued after ${maxPollingAttempts} checks: ${safeResponse(lastResponse)}`,
+    error: `GFG result was still queued after ${maxPollingAttempts} checks`,
   };
 }
 
@@ -81,7 +70,7 @@ function formatResult(response) {
     Number(response?.sub_status) === 1 ||
     (response?.status === "calculated" && response?.message === null)
   ) {
-    return { result: true, response: "Solved successfully" };
+    return { result: true };
   }
 
   const expected = response?.message?.file_output;
@@ -89,13 +78,13 @@ function formatResult(response) {
   if (expected !== undefined || received !== undefined) {
     return {
       result: false,
-      response: `Wrong answer (expected: ${expected ?? "unknown"}, received: ${received ?? "unknown"})`,
+      error: "GFG judged the submission as a wrong answer",
     };
   }
 
   return {
     result: false,
-    response: `GFG returned ${response?.view_mode || response?.status || "an unknown result"}: ${safeResponse(response)}`,
+    error: `GFG returned ${response?.view_mode || response?.status || "an unknown result"}`,
   };
 }
 
@@ -117,9 +106,7 @@ function postMultipart(url, formData, userCookie, operation) {
         if (error) return reject(error);
         if (response.statusCode !== 200) {
           return reject(
-            new Error(
-              `GFG ${operation} returned HTTP ${response.statusCode}: ${safeResponse(body)}`,
-            ),
+            new Error(`GFG ${operation} returned HTTP ${response.statusCode}`),
           );
         }
 
@@ -127,20 +114,14 @@ function postMultipart(url, formData, userCookie, operation) {
           return resolve(JSON.parse(body));
         } catch (parseError) {
           return reject(
-            new Error(
-              `GFG ${operation} returned invalid JSON: ${safeResponse(body)}`,
-              { cause: parseError },
-            ),
+            new Error(`GFG ${operation} returned invalid JSON`, {
+              cause: parseError,
+            }),
           );
         }
       },
     );
   });
-}
-
-function safeResponse(value) {
-  const message = typeof value === "string" ? value : JSON.stringify(value);
-  return (message || "empty response").replace(/\s+/g, " ").slice(0, 500);
 }
 
 function waitForSeconds(seconds) {

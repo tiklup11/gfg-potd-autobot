@@ -24,16 +24,13 @@ async function sendReport({ qid, results }) {
     .map((line) => `<li>${escapeHtml(line)}</li>`)
     .join("");
 
-  const info = await transporter.sendMail({
+  await transporter.sendMail({
     from: smtp.user,
     to: smtp.reportEmail,
     subject: `GFG POTD Report: ${successful}/${results.length} successful`,
     text,
     html: `<h2>GFG POTD: ${escapeHtml(qid)}</h2><p>${summary}</p><ul>${htmlLines}</ul>`,
   });
-
-  console.log(`POTD report sent: ${info.response}`);
-  return info;
 }
 
 function escapeHtml(value) {
