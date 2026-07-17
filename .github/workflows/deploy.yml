@@ -61,10 +61,18 @@ jobs:
           VPS_INFRA_PATH: ${{ vars.VPS_INFRA_PATH }}
           VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          REPORT_EMAIL: ${{ secrets.REPORT_EMAIL }}
+          PORT: ${{ vars.PORT }}
+          CRON_SCHEDULE: ${{ vars.CRON_SCHEDULE }}
+          CRON_TIMEZONE: ${{ vars.CRON_TIMEZONE }}
+          SMTP_HOST: ${{ vars.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT }}
         shell: bash
         run: |
           set -euo pipefail
-          for name in VPS_HOST VPS_USER VPS_APP_PATH VPS_INFRA_PATH VPS_SSH_PRIVATE_KEY VPS_KNOWN_HOSTS; do
+          for name in VPS_HOST VPS_USER VPS_APP_PATH VPS_INFRA_PATH VPS_SSH_PRIVATE_KEY VPS_KNOWN_HOSTS SMTP_USER SMTP_PASSWORD REPORT_EMAIL; do
             if [[ -z "${!name:-}" ]]; then
               echo "Missing GitHub prod environment configuration: $name" >&2
               exit 1
@@ -125,6 +133,14 @@ jobs:
           VPS_APP_PATH: ${{ vars.VPS_APP_PATH }}
           VPS_INFRA_PATH: ${{ vars.VPS_INFRA_PATH }}
           IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          REPORT_EMAIL: ${{ secrets.REPORT_EMAIL }}
+          PORT: ${{ vars.PORT }}
+          CRON_SCHEDULE: ${{ vars.CRON_SCHEDULE }}
+          CRON_TIMEZONE: ${{ vars.CRON_TIMEZONE }}
+          SMTP_HOST: ${{ vars.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT }}
         shell: bash
         run: |
           set -euo pipefail
@@ -137,15 +153,9 @@ jobs:
           set -euo pipefail
           app_path="$1"
           release_id="$2"
-          env_file="$app_path/envs/.env.prod"
           release_dir="$app_path/.github-deployments/$release_id"
 
-          if [[ ! -f "$env_file" ]]; then
-            echo "Protected VPS environment file is missing: $env_file" >&2
-            exit 1
-          fi
-          mkdir -p "$release_dir/envs"
-          ln -s "$env_file" "$release_dir/envs/.env.prod"
+          mkdir -p "$release_dir"
           REMOTE
 
           scp -o StrictHostKeyChecking=yes -i ~/.ssh/deploy_key -P "$port" \
@@ -155,8 +165,16 @@ jobs:
             config/solution-user.json \
             "${VPS_USER}@${VPS_HOST}:${VPS_APP_PATH}/.github-deployments/${release_id}/"
 
-          ssh -o StrictHostKeyChecking=yes -i ~/.ssh/deploy_key -p "$port" "${VPS_USER}@${VPS_HOST}" \
-            bash -s -- "$VPS_APP_PATH" "$VPS_INFRA_PATH" "$release_id" "$image" <<'REMOTE'
+          {
+            printf 'export SMTP_USER=%q\n' "$SMTP_USER"
+            printf 'export SMTP_PASSWORD=%q\n' "$SMTP_PASSWORD"
+            printf 'export REPORT_EMAIL=%q\n' "$REPORT_EMAIL"
+            printf 'export PORT=%q\n' "$PORT"
+            printf 'export CRON_SCHEDULE=%q\n' "$CRON_SCHEDULE"
+            printf 'export CRON_TIMEZONE=%q\n' "$CRON_TIMEZONE"
+            printf 'export SMTP_HOST=%q\n' "$SMTP_HOST"
+            printf 'export SMTP_PORT=%q\n' "$SMTP_PORT"
+            cat <<'REMOTE'
           set -euo pipefail
           app_path="$1"
           infra_path="$2"
@@ -174,10 +192,13 @@ jobs:
           install -m 600 "$release_dir/users.json" "$app_path/config/users.json"
           install -m 600 "$release_dir/solution-user.json" "$app_path/config/solution-user.json"
 
+          export CONFIG_DIR="$app_path/config"
           CI_DEPLOY_APPROVED=true "$deploy_script" \
             --workdir "$release_dir" \
             gfg-potd-bot prod rollout-image "$image"
           REMOTE
+          } | ssh -o StrictHostKeyChecking=yes -i ~/.ssh/deploy_key -p "$port" "${VPS_USER}@${VPS_HOST}" \
+            bash -s -- "$VPS_APP_PATH" "$VPS_INFRA_PATH" "$release_id" "$image"
 
       - name: Write deployment summary
         if: always()

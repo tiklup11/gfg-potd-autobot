@@ -3,9 +3,10 @@
 Runs the GeeksforGeeks problem of the day for users configured in a protected
 JSON file and emails one result summary after each run.
 
-The default schedule is `0 15 * * *` in `Asia/Kolkata`, which is 3:00 PM IST.
-Change `CRON_SCHEDULE` or `CRON_TIMEZONE` in the VPS environment file when
-needed.
+The default schedule is `0 15,18,21,23 * * *` in `Asia/Kolkata`, which runs at
+3:00 PM, 6:00 PM, 9:00 PM, and 11:00 PM IST every day. Change `CRON_SCHEDULE`
+or `CRON_TIMEZONE` in the GitHub `prod` environment when needed. Defaults live
+in `src/appconfig.js`, and process environment variables take precedence.
 
 ## Add or update users
 
@@ -75,9 +76,9 @@ command exits with status `0` on success and `1` on failure.
 ## VPS deployment
 
 GitHub Actions builds an ARM64 image and automatically deploys pushes to `main`
-through `infra_repo/scripts/deploy-app.sh`. Runtime configuration stays on the
-VPS at `<VPS_APP_PATH>/envs/.env.prod`; use `envs/.env.prod.example` as its
-template.
+through `infra_repo/scripts/deploy-app.sh`. Runtime configuration is declared in
+the Compose files, while GitHub streams production secrets into the deployment's
+remote shell over SSH.
 
 The GitHub `prod` environment requires these variables:
 
@@ -86,6 +87,20 @@ The GitHub `prod` environment requires these variables:
 - `VPS_USER`
 - `VPS_APP_PATH`
 - `VPS_INFRA_PATH`
+- `PORT` (optional)
+- `CRON_SCHEDULE` (optional)
+- `CRON_TIMEZONE` (optional)
+- `SMTP_HOST` (optional)
+- `SMTP_PORT` (optional)
 
-It also requires `VPS_SSH_PRIVATE_KEY` and `VPS_KNOWN_HOSTS` as secrets. The
-VPS must already be logged in to GHCR and have the latest `infra_repo` checkout.
+It also requires these secrets:
+
+- `VPS_SSH_PRIVATE_KEY`
+- `VPS_KNOWN_HOSTS`
+- `SMTP_USER`
+- `SMTP_PASSWORD`
+- `REPORT_EMAIL`
+
+Updating a secret takes effect on the next push to `main` or manual workflow
+dispatch. The VPS must already be logged in to GHCR and have the latest
+`infra_repo` checkout.

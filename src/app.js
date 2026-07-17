@@ -6,10 +6,11 @@ const codeMerger = require("./code_merger");
 const urlFetcher = require("./url_fetcher");
 const mailSender = require("./services/mail_sender");
 const { loadUsers, loadSolutionAuthHeader } = require("./users");
+const appConfig = require("./appconfig");
 
-const schedule = process.env.CRON_SCHEDULE || "0 15 * * *";
-const timezone = process.env.CRON_TIMEZONE || "Asia/Kolkata";
-const port = Number(process.env.PORT || 1289);
+const schedule = appConfig.cronSchedule;
+const timezone = appConfig.cronTimezone;
+const port = appConfig.port;
 let jobRunning = false;
 
 const arguments = process.argv.slice(2);

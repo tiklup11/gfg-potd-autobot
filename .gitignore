@@ -1,5 +1,4 @@
 node_modules
 .env
-envs/.env.prod
 src/services/serviceApiKey.json
 src/const/*_cookie.js
