@@ -77,8 +77,8 @@ command exits with status `0` on success and `1` on failure.
 
 GitHub Actions builds an ARM64 image and automatically deploys pushes to `main`
 through `infra_repo/scripts/deploy-app.sh`. Runtime configuration is declared in
-the Compose files, while GitHub streams production secrets into the deployment's
-remote shell over SSH.
+the Compose files, while GitHub streams production configuration into the
+deployment's remote shell over SSH.
 
 The GitHub `prod` environment requires these variables:
 
@@ -92,15 +92,15 @@ The GitHub `prod` environment requires these variables:
 - `CRON_TIMEZONE` (optional)
 - `SMTP_HOST` (optional)
 - `SMTP_PORT` (optional)
+- `SMTP_USER`
+- `REPORT_EMAIL`
 
 It also requires these secrets:
 
 - `VPS_SSH_PRIVATE_KEY`
 - `VPS_KNOWN_HOSTS`
-- `SMTP_USER`
 - `SMTP_PASSWORD`
-- `REPORT_EMAIL`
 
-Updating a secret takes effect on the next push to `main` or manual workflow
+Updating a variable or secret takes effect on the next push to `main` or manual workflow
 dispatch. The VPS must already be logged in to GHCR and have the latest
 `infra_repo` checkout.
