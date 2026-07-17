@@ -61,9 +61,9 @@ jobs:
           VPS_INFRA_PATH: ${{ vars.VPS_INFRA_PATH }}
           VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_USER: ${{ vars.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          REPORT_EMAIL: ${{ secrets.REPORT_EMAIL }}
+          REPORT_EMAIL: ${{ vars.REPORT_EMAIL }}
           PORT: ${{ vars.PORT }}
           CRON_SCHEDULE: ${{ vars.CRON_SCHEDULE }}
           CRON_TIMEZONE: ${{ vars.CRON_TIMEZONE }}
@@ -133,9 +133,9 @@ jobs:
           VPS_APP_PATH: ${{ vars.VPS_APP_PATH }}
           VPS_INFRA_PATH: ${{ vars.VPS_INFRA_PATH }}
           IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_USER: ${{ vars.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          REPORT_EMAIL: ${{ secrets.REPORT_EMAIL }}
+          REPORT_EMAIL: ${{ vars.REPORT_EMAIL }}
           PORT: ${{ vars.PORT }}
           CRON_SCHEDULE: ${{ vars.CRON_SCHEDULE }}
           CRON_TIMEZONE: ${{ vars.CRON_TIMEZONE }}
