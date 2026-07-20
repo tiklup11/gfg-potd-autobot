@@ -1,6 +1,8 @@
 const request = require("request");
 const { hostName } = require("./const/constants");
 
+const requestTimeoutMs = 30_000;
+
 async function fetchStarterCode(qid, authHeader) {
   const body = await fetchJson(
     `${hostName}/api/latest/problems/${qid}/metainfo/`,
@@ -35,6 +37,7 @@ function fetchJson(url, authHeader) {
       {
         url,
         json: true,
+        timeout: requestTimeoutMs,
         headers: { Cookie: authHeader },
       },
       (error, response, body) => {

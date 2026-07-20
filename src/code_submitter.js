@@ -3,6 +3,7 @@ const { hostName } = require("./const/constants");
 
 const pollingIntervalSeconds = 15;
 const maxPollingAttempts = 10;
+const requestTimeoutMs = 30_000;
 
 function submitCode(userCode, code, qid, userCookie) {
   return postMultipart(
@@ -90,11 +91,11 @@ function formatResult(response) {
 
 function postMultipart(url, formData, userCookie, operation) {
   return new Promise((resolve, reject) => {
-    request(
+    request.post(
       {
         url,
-        method: "POST",
         formData,
+        timeout: requestTimeoutMs,
         headers: {
           Accept: "*/*",
           Cookie: userCookie,
