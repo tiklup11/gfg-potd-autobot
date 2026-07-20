@@ -5,7 +5,8 @@
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
-    "check": "find src scripts -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "check": "find src scripts test -name '*.js' -print0 | xargs -0 -n1 node --check",
+    "test": "node --test --test-concurrency=1",
     "run:once": "node src/app.js --run-once",
     "user:upsert": "node scripts/upsert-user.js",
     "solution:set": "node scripts/upsert-user.js --solution"

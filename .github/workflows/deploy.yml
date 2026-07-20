@@ -49,6 +49,9 @@ jobs:
       - name: Check JavaScript syntax
         run: npm run check
 
+      - name: Run unit tests
+        run: npm test
+
       - name: Validate credential database
         run: node -e 'const users = require("./src/users"); users.loadUsers(); users.loadSolutionAuthHeader();'
 

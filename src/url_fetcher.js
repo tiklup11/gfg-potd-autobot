@@ -4,12 +4,14 @@ const constants = require("./const/constants");
 
 const potdURL = `${constants.hostName}/api/v1/problems-of-day/problem/today/`;
 const problemUrl = "";
+const requestTimeoutMs = 30_000;
 
 function getProblemUrl() {
   return new Promise((resolve, reject) => {
     const options = {
       url: potdURL,
       json: true,
+      timeout: requestTimeoutMs,
     };
 
     request.get(options, (error, response, body) => {

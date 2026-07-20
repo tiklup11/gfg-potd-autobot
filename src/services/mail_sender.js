@@ -1,6 +1,8 @@
 const nodemailer = require("nodemailer");
 const { smtp } = require("../appconfig");
 
+const smtpTimeoutMs = 30_000;
+
 async function sendReport({ qid, results }) {
   if (!smtp.user || !smtp.password || !smtp.reportEmail) {
     throw new Error("SMTP_USER, SMTP_PASSWORD, and REPORT_EMAIL are required");
@@ -9,6 +11,9 @@ async function sendReport({ qid, results }) {
     host: smtp.host,
     port: smtp.port,
     secure: false,
+    connectionTimeout: smtpTimeoutMs,
+    greetingTimeout: smtpTimeoutMs,
+    socketTimeout: smtpTimeoutMs,
     auth: { user: smtp.user, pass: smtp.password },
   });
   const successful = results.filter((result) => result.success).length;
