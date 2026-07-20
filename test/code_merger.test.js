@@ -14,10 +14,19 @@ test("mergeCode inserts the solution before the GFG marker", () => {
   );
 });
 
-test("mergeCode fails immediately when the GFG marker is missing", () => {
+test("mergeCode inserts the solution before main when the marker is missing", () => {
+  const driverCode = "#include <vector>\nusing namespace std;\n\nint main() {}";
+
+  assert.equal(
+    mergeCode("class Solution {};\n\n", driverCode),
+    "#include <vector>\nusing namespace std;\n\nclass Solution {};\n\nint main() {}",
+  );
+});
+
+test("mergeCode rejects starter code without a marker or main function", () => {
   assert.throws(
-    () => mergeCode("solution", "driver without marker"),
-    /GFG starter code did not contain the user-code marker/,
+    () => mergeCode("solution", "invalid driver"),
+    /did not contain the user-code marker or main function/,
   );
 });
 
