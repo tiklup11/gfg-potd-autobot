@@ -1,22 +1,16 @@
-const targetWord = "//Position this line where user code will be pasted."
-const targetLen = targetWord.length;
+const targetWord = "//Position this line where user code will be pasted.";
 
-function mergeCode(justClassCode, int_Main_code) {
-    var newFullCode = "";
-    var index = 0;
-    var currrentWord = int_Main_code.substring(index, index + targetLen);
+function mergeCode(solutionCode, driverCode) {
+  const index = driverCode.indexOf(targetWord);
+  if (index === -1) {
+    throw new Error("GFG starter code did not contain the user-code marker");
+  }
 
-    while (currrentWord != targetWord) {
-        index++;
-        currrentWord = int_Main_code.substring(index, index + targetLen)
-    }
+  const firstPart = driverCode.substring(0, index);
+  const thirdPart = driverCode.substring(index);
 
-    const firstPart = int_Main_code.substring(0, index)
-    const secondPart = justClassCode
-    const thirdPart = int_Main_code.substring(index)
-
-    return firstPart + secondPart + thirdPart
+  return firstPart + solutionCode + thirdPart;
 }
 
-module.exports = { mergeCode }
+module.exports = { mergeCode };
 
