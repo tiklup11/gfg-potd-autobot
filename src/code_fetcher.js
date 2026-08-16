@@ -24,7 +24,9 @@ async function fetchSolutionCode(qid, authHeader) {
     `${hostName}/api/latest/problems/${qid}/hints/solution/`,
     authHeader,
   );
-  const solution = body?.results?.hints?.[0]?.full_func;
+  const solution = body?.results?.hints?.find(
+    (hint) => hint?.lang_text === "cpp",
+  )?.full_func;
   if (!solution) {
     throw new Error("GFG response did not contain a C++ solution");
   }

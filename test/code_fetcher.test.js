@@ -36,10 +36,23 @@ test("fetchStarterCode rejects incomplete metadata", async () => {
   );
 });
 
-test("fetchSolutionCode returns the first C++ solution", async () => {
+test("fetchSolutionCode selects the C++ solution regardless of ordering", async () => {
   mock.method(request, "get", (_options, callback) => {
     callback(null, { statusCode: 200 }, {
-      results: { hints: [{ full_func: "class Solution {};" }] },
+      results: {
+        hints: [
+          {
+            lang: "C",
+            lang_text: "c",
+            full_func: "int solve(int* values, int count) {}",
+          },
+          {
+            lang: "C++",
+            lang_text: "cpp",
+            full_func: "class Solution {};",
+          },
+        ],
+      },
     });
   });
 

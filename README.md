@@ -1,12 +1,15 @@
 # GFG POTD Autobot
 
 Runs the GeeksforGeeks problem of the day for users configured in a protected
-JSON file and emails one result summary after each run.
+JSON file and emails one result summary after each attempted run. After the
+first fully successful run of the day, later scheduled runs and emails are
+skipped.
 
-The default schedule is `0 15,18,21,23 * * *` in `Asia/Kolkata`, which runs at
-3:00 PM, 6:00 PM, 9:00 PM, and 11:00 PM IST every day. Change `CRON_SCHEDULE`
-or `CRON_TIMEZONE` in the GitHub `prod` environment when needed. Defaults live
-in `src/appconfig.js`, and process environment variables take precedence.
+The default schedule is `0 10,13,16,19,22 * * *` in `Asia/Kolkata`, which runs
+at 10:00 AM, 1:00 PM, 4:00 PM, 7:00 PM, and 10:00 PM IST every day. Change
+`CRON_SCHEDULE` or `CRON_TIMEZONE` in the GitHub `prod` environment when needed.
+Defaults live in `src/appconfig.js`, and process environment variables take
+precedence.
 
 ## Add or update users
 
@@ -76,7 +79,7 @@ command exits with status `0` on success and `1` on failure.
 ## VPS deployment
 
 GitHub Actions builds an ARM64 image and automatically deploys pushes to `main`
-through `infra_repo/scripts/deploy-app.sh`. Runtime configuration is declared in
+through `shared_infra/scripts/deploy-app.sh`. Runtime configuration is declared in
 the Compose files, while GitHub streams production configuration into the
 deployment's remote shell over SSH.
 
