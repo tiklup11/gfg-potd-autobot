@@ -2,7 +2,7 @@
 
 const defaults = Object.freeze({
   port: 1289,
-  cronSchedule: "0 15,18,21,23 * * *",
+  cronSchedule: "0 10,13,16,19,22 * * *",
   cronTimezone: "Asia/Kolkata",
   smtpHost: "smtp.gmail.com",
   smtpPort: 587,

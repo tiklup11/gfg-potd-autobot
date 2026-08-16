@@ -8,6 +8,7 @@ const urlFetcher = require("./url_fetcher");
 const mailSender = require("./services/mail_sender");
 const { loadUsers, loadSolutionAuthHeader } = require("./users");
 const appConfig = require("./appconfig");
+const { createDailyRunGuard, dateInTimezone } = require("./daily_run_guard");
 
 const schedule = appConfig.cronSchedule;
 const timezone = appConfig.cronTimezone;
@@ -40,7 +41,17 @@ function startScheduler() {
     throw new Error(`Invalid CRON_SCHEDULE: ${schedule}`);
   }
 
-  cron.schedule(schedule, () => void runJob({ trigger: "cron" }), { timezone });
+  const runScheduledJob = createDailyRunGuard({
+    run: () => runJob({ trigger: "cron" }),
+    getDate: () => dateInTimezone(new Date(), timezone),
+    onSkip: (date) =>
+      observability.info("job.skipped", {
+        reason: "already_succeeded_today",
+        date,
+      }),
+  });
+
+  cron.schedule(schedule, () => void runScheduledJob(), { timezone });
   observability.info("scheduler.started", {
     schedule,
     timezone,
