@@ -7,7 +7,7 @@ skipped.
 
 The default schedule is `0 10,13,16,19,22 * * *` in `Asia/Kolkata`, which runs
 at 10:00 AM, 1:00 PM, 4:00 PM, 7:00 PM, and 10:00 PM IST every day. Change
-`CRON_SCHEDULE` or `CRON_TIMEZONE` in the GitHub `prod` environment when needed.
+`CRON_SCHEDULE` or `CRON_TIMEZONE` in the runtime environment when needed.
 Defaults live in `src/appconfig.js`, and process environment variables take
 precedence.
 
@@ -48,7 +48,7 @@ npm run user:upsert -- \
 
 Emails are matched case-insensitively, so an existing entry is replaced instead
 of duplicated. Run the command once for each user, then commit and push the
-updated file to `main`. GitHub Actions deploys it to the VPS automatically.
+updated file to the branch deployed by Dokploy.
 
 `config/users.json` is the bot's small user database and is tracked in this
 personal private repository. It contains active login credentials, so the
@@ -63,9 +63,7 @@ submission users remain eligible for their own reward points:
 npm run solution:set -- --cookies /path/to/solution-account-export.json
 ```
 
-This writes the tracked `config/solution-user.json` file. GitHub Actions deploys
-both JSON files to `<VPS_APP_PATH>/config` with mode `600` before restarting the
-bot container.
+This writes the tracked `config/solution-user.json` file.
 
 To test one configured user immediately without sending the report email:
 
@@ -76,39 +74,30 @@ npm run run:once -- user@example.com --no-email
 Remove `--no-email` to send the normal summary report after the test. The
 command exits with status `0` on success and `1` on failure.
 
-## VPS deployment
+## Dokploy deployment
 
-GitHub Actions builds an ARM64 image and automatically deploys pushes to `main`
-through `shared_infra/scripts/deploy-app.sh`. Runtime configuration is declared in
-the Compose files, while GitHub streams production configuration into the
-deployment's remote shell over SSH.
+Deploy the repository as a Dockerfile application with build context `.`. The
+bot does not need a public domain; its internal port is `1289`, and Docker checks
+`/healthz` automatically.
 
-The GitHub `prod` environment requires these variables:
+Create these file mounts from the corresponding private repository files:
 
-- `VPS_HOST`
-- `VPS_PORT`
-- `VPS_USER`
-- `VPS_APP_PATH`
-- `VPS_INFRA_PATH`
+- `config/users.json` at `/app/config/users.json`
+- `config/solution-user.json` at `/app/config/solution-user.json`
+
+Set these runtime variables in Dokploy:
+
+- `NODE_ENV=production`
 - `PORT` (optional)
 - `CRON_SCHEDULE` (optional)
 - `CRON_TIMEZONE` (optional)
 - `SMTP_HOST` (optional)
 - `SMTP_PORT` (optional)
 - `SMTP_USER`
+- `SMTP_PASSWORD`
 - `REPORT_EMAIL`
 - `NEW_RELIC_APP_NAME` (optional; defaults to `gfg-potd-bot`)
-
-It also requires these secrets:
-
-- `VPS_SSH_PRIVATE_KEY`
-- `VPS_KNOWN_HOSTS`
-- `SMTP_PASSWORD`
 - `NEW_RELIC_LICENSE_KEY` (optional; enables New Relic in production)
-
-Updating a variable or secret takes effect on the next push to `main` or manual workflow
-dispatch. The VPS must already be logged in to GHCR and have the latest
-`infra_repo` checkout.
 
 Production logs are emitted as JSON and, when `NEW_RELIC_LICENSE_KEY` is set,
 forwarded to New Relic. They include scheduler, job, per-user submission, report
