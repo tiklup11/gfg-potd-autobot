@@ -14,11 +14,13 @@ function main() {
   const authHeader = createAuthHeader(cookies);
   const outputPath = path.resolve(
     options.output ||
-      (options.solution ? "config/solution-user.json" : "config/users.json"),
+      (options.solution
+        ? "src/configured_solution_user.js"
+        : "src/configured_users.js"),
   );
 
   if (options.solution) {
-    writeJsonAtomically(outputPath, { authHeader });
+    writeModuleAtomically(outputPath, { authHeader });
     console.log(
       `Updated solution account in ${outputPath} (${cookies.length} exported cookies)`,
     );
@@ -39,7 +41,7 @@ function main() {
     users[existingIndex] = nextUser;
   }
 
-  writeJsonAtomically(outputPath, users);
+  writeModuleAtomically(outputPath, users);
   console.log(
     `${action} ${email} in ${outputPath} (${cookies.length} exported cookies)`,
   );
@@ -153,9 +155,10 @@ function createAuthHeader(cookies) {
 
 function readUsers(outputPath) {
   if (!fs.existsSync(outputPath)) return [];
-  const users = readJson(outputPath, "users file");
+  delete require.cache[require.resolve(outputPath)];
+  const users = require(outputPath);
   if (!Array.isArray(users)) {
-    throw new Error(`${outputPath} must contain a JSON array`);
+    throw new Error(`${outputPath} must export an array`);
   }
   for (const [index, user] of users.entries()) {
     if (
@@ -169,7 +172,7 @@ function readUsers(outputPath) {
   return users;
 }
 
-function writeJsonAtomically(outputPath, value) {
+function writeModuleAtomically(outputPath, value) {
   const directory = path.dirname(outputPath);
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const temporaryPath = path.join(
@@ -178,7 +181,8 @@ function writeJsonAtomically(outputPath, value) {
   );
 
   try {
-    fs.writeFileSync(temporaryPath, `${JSON.stringify(value, null, 2)}\n`, {
+    const source = `module.exports = ${JSON.stringify(value, null, 2)};\n`;
+    fs.writeFileSync(temporaryPath, source, {
       encoding: "utf8",
       flag: "wx",
       mode: 0o600,

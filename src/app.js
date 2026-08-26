@@ -104,7 +104,7 @@ async function runJob({
         (user) => user.email.toLowerCase() === targetEmail.toLowerCase(),
       );
       if (users.length === 0) {
-        throw new Error(`User not found in users.json: ${targetEmail}`);
+        throw new Error(`Configured user not found: ${targetEmail}`);
       }
     }
     observability.info("job.users_loaded", { userCount: users.length });
